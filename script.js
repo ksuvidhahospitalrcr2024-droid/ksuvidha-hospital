@@ -1121,124 +1121,79 @@ function showDischarge() {
 
                 <!-- SUMMARY -->
 
-                <div class="summary">
-
-
-                    <div class="summary-section">
-
-                        DATE OF ADMISSION
-
-                        <div class="line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section">
-
-                        DATE OF DISCHARGE
-
-                        <div class="line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        FINAL DIAGNOSIS
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        PRESENTING COMPLAINTS
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        HISTORY / CLINICAL FINDINGS
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        INVESTIGATIONS
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        PROCEDURE / SURGERY PERFORMED
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        HOSPITAL COURSE
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        CONDITION AT DISCHARGE
-
-                        <div class="line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        MEDICATIONS AT DISCHARGE
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        DISCHARGE ADVICE
-
-                        <div class="line large-line"></div>
-
-                    </div>
-
-
-                    <div class="summary-section full-section">
-
-                        FOLLOW-UP ADVICE
-
-                        <div class="line"></div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SIGNATURE -->
-
-                <div class="signature">
-
-                    <div>
+             <div class="summary">
+
+    <div class="summary-section">
+        DATE OF ADMISSION
+        <input type="date" style="width:100%;padding:8px;margin-top:5px;">
+    </div>
+
+    <div class="summary-section">
+        DATE OF DISCHARGE
+        <input type="date" style="width:100%;padding:8px;margin-top:5px;">
+    </div>
+
+    <div class="summary-section full-section">
+        FINAL DIAGNOSIS
+        <textarea placeholder="Type final diagnosis here..."
+            style="width:100%;min-height:70px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        PRESENTING COMPLAINTS
+        <textarea placeholder="Type presenting complaints here..."
+            style="width:100%;min-height:70px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        HISTORY / CLINICAL FINDINGS
+        <textarea placeholder="Type history and clinical findings here..."
+            style="width:100%;min-height:90px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        INVESTIGATIONS
+        <textarea placeholder="Type investigations and results here..."
+            style="width:100%;min-height:80px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        PROCEDURE / SURGERY PERFORMED
+        <textarea placeholder="Type procedure / surgery details here..."
+            style="width:100%;min-height:80px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        HOSPITAL COURSE
+        <textarea placeholder="Type hospital course here..."
+            style="width:100%;min-height:90px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        CONDITION AT DISCHARGE
+        <textarea placeholder="Type condition at discharge here..."
+            style="width:100%;min-height:60px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        MEDICATIONS AT DISCHARGE
+        <textarea placeholder="Type discharge medications here..."
+            style="width:100%;min-height:100px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        DISCHARGE ADVICE
+        <textarea placeholder="Type discharge advice here..."
+            style="width:100%;min-height:90px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div class="summary-section full-section">
+        FOLLOW-UP ADVICE
+        <textarea placeholder="Type follow-up advice here..."
+            style="width:100%;min-height:60px;padding:8px;margin-top:5px;box-sizing:border-box;"></textarea>
+    </div>
+
+</div>  
 
                         Patient / Attendant Signature
 
