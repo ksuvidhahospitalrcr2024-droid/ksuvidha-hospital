@@ -28,14 +28,17 @@ function showPage(page) {
 
     closeMenu();
 
-    if (page === "home") {
-        showHome();
-    }
+ if (page === "home") {
+    showHome();
+}
 
-    else if (page === "registration") {
-        showRegistration();
-    }
+else if (page === "patient-record") {
+    showPatientRecord(1);
+}
 
+else if (page === "registration") {
+    showRegistration();
+}  
     else if (page === "consultation") {
         showConsultation();
     }
