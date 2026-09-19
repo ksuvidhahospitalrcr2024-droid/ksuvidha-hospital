@@ -1053,9 +1053,9 @@ function showDischarge() {
 
                 <div class="paper-header">
 
-                    <div class="paper-logo">
-                        KS
-                    </div>
+                 <div class="paper-logo">
+    <img src="image.png" alt="K. Suvidha Hospital Logo">
+</div>  
 
                     <div>
 
