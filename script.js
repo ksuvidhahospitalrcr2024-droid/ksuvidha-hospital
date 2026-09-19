@@ -1053,11 +1053,11 @@ function showDischarge() {
 
                 <div class="paper-header">
 
-            <div class="paper-logo" style="width:70px;height:70px;overflow:hidden;border-radius:50%;flex-shrink:0;">
+   <div class="paper-logo" style="width:45px !important;height:45px !important;max-width:45px !important;max-height:45px !important;overflow:hidden !important;border-radius:50%;">
     <img src="image.png"
          alt="K. Suvidha Hospital Logo"
-         style="width:70px;height:70px;object-fit:cover;object-position:center top;display:block;">
-</div>     
+         style="width:45px !important;height:45px !important;max-width:45px !important;max-height:45px !important;object-fit:cover !important;object-position:center top !important;display:block !important;">
+</div>         
                     <div>
 
                         <div class="kannada">
