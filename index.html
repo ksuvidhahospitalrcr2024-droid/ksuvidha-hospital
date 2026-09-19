@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>K. Suvidha Hospital</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo-area">
+
+        <div class="logo">
+            KS
+        </div>
+
+        <div>
+            <h2>K. SUVIDHA</h2>
+            <p>SUPER SPECIALITY HOSPITAL</p>
+        </div>
+
+    </div>
+
+    <button class="menu-button" onclick="openMenu()">
+        ☰
+    </button>
+
+</header>
+
+
+<div id="sideMenu" class="side-menu">
+
+    <button class="close-button" onclick="closeMenu()">
+        ×
+    </button>
+
+    <h3>Patient Portal</h3>
+
+    <button onclick="showPage('home')">
+        🏥 Home
+    </button>
+
+    <button onclick="showPage('registration')">
+        👤 Patient Registration
+    </button>
+
+    <button onclick="showPage('consultation')">
+        🩺 Consultation
+    </button>
+
+    <button onclick="showPage('investigations')">
+        🧪 Investigations
+    </button>
+
+    <button onclick="showPage('prescription')">
+        💊 Prescription
+    </button>
+
+    <button onclick="showPage('admission')">
+        🏨 Admission / Treatment
+    </button>
+
+    <button onclick="showPage('billing')">
+        💰 Billing
+    </button>
+
+    <button onclick="showPage('followup')">
+        📅 Follow-up
+    </button>
+
+    <button
+        class="last-menu"
+        onclick="showPage('discharge')">
+
+        📄 Discharge Summary
+
+    </button>
+
+</div>
+
+
+<main id="app"></main>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
