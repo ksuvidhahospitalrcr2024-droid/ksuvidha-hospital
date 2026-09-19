@@ -1264,7 +1264,854 @@ function patientArea(label, field, placeholder = "") {
 
         </div>
     `;
-} 
+} // ==========================================
+// SHOW PATIENT RECORD
+// ==========================================
+
+function showPatientRecord(page = 1) {
+
+    let content = "";
+    let title = patientRecordPages[page - 1];
+
+
+    // ==========================================
+    // PAGE 1 - FRONT PAGE
+    // ==========================================
+
+    if (page === 1) {
+
+        content = `
+
+            <div class="record-front-grid">
+
+                <div class="services-column">
+
+                    <h3>Services Available</h3>
+
+                    <p>✤ Joint Replacement</p>
+                    <p>✤ Complex Trauma</p>
+                    <p>✤ Emergency Accident Care</p>
+                    <p>✤ Poly Trauma</p>
+                    <p>✤ Paediatric Orthopaedics</p>
+                    <p>✤ Hand Surgery</p>
+                    <p>✤ Spine Surgery</p>
+                    <p>✤ Arthroscopy</p>
+                    <p>✤ Ilizarov</p>
+
+
+                    <h3>Facilities</h3>
+
+                    <p>✤ Laminar OT with C-arm</p>
+                    <p>✤ Special AC Rooms</p>
+                    <p>✤ DR System X-Ray</p>
+                    <p>✤ Physiotherapy</p>
+                    <p>✤ ICU with Ventilators</p>
+
+                </div>
+
+
+                <div class="front-main">
+
+                    <div class="rx-symbol">
+                        ℞
+                    </div>
+
+
+                    ${patientArea(
+                        "Address",
+                        "address",
+                        "Patient address"
+                    )}
+
+
+                    ${patientField(
+                        "Contact Number",
+                        "contact",
+                        "text",
+                        "Mobile number"
+                    )}
+
+
+                    ${patientArea(
+                        "Emergency Contact",
+                        "emergencyContact",
+                        "Emergency contact details"
+                    )}
+
+
+                    ${patientArea(
+                        "Initial Notes",
+                        "initialNotes",
+                        "Initial patient notes"
+                    )}
+
+                </div>
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 2 - REGISTRATION
+// ==========================================
+
+    else if (page === 2) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Date of Birth",
+                    "dob",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Occupation",
+                    "occupation",
+                    "text",
+                    "Occupation"
+                )}
+
+                ${patientField(
+                    "Marital Status",
+                    "maritalStatus",
+                    "text",
+                    "Marital status"
+                )}
+
+                ${patientField(
+                    "Referral",
+                    "referral",
+                    "text",
+                    "Referred by"
+                )}
+
+                ${patientField(
+                    "Department",
+                    "department",
+                    "text",
+                    "Department"
+                )}
+
+                ${patientField(
+                    "Registration Number",
+                    "registrationNumber",
+                    "text",
+                    "Registration number"
+                )}
+
+                ${patientArea(
+                    "Full Address",
+                    "registrationAddress",
+                    "Patient address"
+                )}
+
+                ${patientArea(
+                    "Registration Notes",
+                    "registrationNotes",
+                    "Additional registration details"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 3 - CONSULTATION
+// ==========================================
+
+    else if (page === 3) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientArea(
+                    "Chief Complaints",
+                    "chiefComplaints",
+                    "Main complaints"
+                )}
+
+                ${patientArea(
+                    "History of Present Illness",
+                    "historyPresentIllness",
+                    "History of present illness"
+                )}
+
+                ${patientArea(
+                    "Past Medical History",
+                    "pastMedicalHistory",
+                    "Past medical history"
+                )}
+
+                ${patientArea(
+                    "Past Surgical History",
+                    "pastSurgicalHistory",
+                    "Past surgical history"
+                )}
+
+                ${patientArea(
+                    "Clinical Examination",
+                    "clinicalExamination",
+                    "Clinical examination findings"
+                )}
+
+                ${patientArea(
+                    "Diagnosis",
+                    "diagnosis",
+                    "Diagnosis"
+                )}
+
+                ${patientArea(
+                    "Treatment Plan",
+                    "treatmentPlan",
+                    "Treatment plan"
+                )}
+
+                ${patientArea(
+                    "Doctor's Notes",
+                    "doctorNotes",
+                    "Doctor's notes"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 4 - X-RAY / BLOOD / INVESTIGATIONS
+// ==========================================
+
+    else if (page === 4) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Investigation Date",
+                    "investigationDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Investigation Type",
+                    "investigationType",
+                    "text",
+                    "X-Ray / Blood / Other"
+                )}
+
+                ${patientArea(
+                    "X-Ray Details / Findings",
+                    "xrayDetails",
+                    "Enter X-Ray findings"
+                )}
+
+                ${patientArea(
+                    "Blood Test",
+                    "bloodTest",
+                    "Enter blood test details and results"
+                )}
+
+                ${patientArea(
+                    "Other Investigations",
+                    "otherInvestigations",
+                    "Other test details"
+                )}
+
+                ${patientArea(
+                    "Investigation Results",
+                    "investigationResults",
+                    "Enter investigation results"
+                )}
+
+                ${patientArea(
+                    "Doctor / Radiologist Impression",
+                    "investigationImpression",
+                    "Final impression"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 5 - PRESCRIPTION / PHARMACY
+// ==========================================
+
+    else if (page === 5) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Prescription Date",
+                    "prescriptionDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Medicine 1",
+                    "medicine1",
+                    "text",
+                    "Medicine name"
+                )}
+
+                ${patientField(
+                    "Dose 1",
+                    "dose1",
+                    "text",
+                    "Dose"
+                )}
+
+                ${patientField(
+                    "Frequency 1",
+                    "frequency1",
+                    "text",
+                    "Once / Twice / Thrice"
+                )}
+
+                ${patientField(
+                    "Duration 1",
+                    "duration1",
+                    "text",
+                    "Number of days"
+                )}
+
+                ${patientField(
+                    "Medicine 2",
+                    "medicine2",
+                    "text",
+                    "Medicine name"
+                )}
+
+                ${patientField(
+                    "Dose 2",
+                    "dose2",
+                    "text",
+                    "Dose"
+                )}
+
+                ${patientField(
+                    "Frequency 2",
+                    "frequency2",
+                    "text",
+                    "Frequency"
+                )}
+
+                ${patientField(
+                    "Duration 2",
+                    "duration2",
+                    "text",
+                    "Number of days"
+                )}
+
+                ${patientArea(
+                    "Additional Medicines",
+                    "additionalMedicines",
+                    "Enter additional medicines"
+                )}
+
+                ${patientArea(
+                    "Pharmacy Instructions",
+                    "pharmacyInstructions",
+                    "Instructions"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 6 - ADMISSION & TREATMENT
+// ==========================================
+
+    else if (page === 6) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Admission Date",
+                    "admissionDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Admission Time",
+                    "admissionTime",
+                    "time"
+                )}
+
+                ${patientField(
+                    "Ward / Room",
+                    "wardRoom",
+                    "text",
+                    "Ward / Room number"
+                )}
+
+                ${patientField(
+                    "Bed Number",
+                    "bedNumber",
+                    "text",
+                    "Bed number"
+                )}
+
+                ${patientField(
+                    "Attending Doctor",
+                    "attendingDoctor",
+                    "text",
+                    "Doctor name"
+                )}
+
+                ${patientField(
+                    "Procedure / Surgery Date",
+                    "surgeryDate",
+                    "date"
+                )}
+
+                ${patientArea(
+                    "Admission Diagnosis",
+                    "admissionDiagnosis",
+                    "Diagnosis at admission"
+                )}
+
+                ${patientArea(
+                    "Treatment Given",
+                    "treatmentGiven",
+                    "Details of treatment"
+                )}
+
+                ${patientArea(
+                    "Procedure / Surgery",
+                    "procedureSurgery",
+                    "Procedure or surgery details"
+                )}
+
+                ${patientArea(
+                    "Daily Treatment Notes",
+                    "dailyTreatmentNotes",
+                    "Daily progress and treatment notes"
+                )}
+
+                ${patientArea(
+                    "Nursing Notes",
+                    "nursingNotes",
+                    "Nursing observations and notes"
+                )}
+
+                ${patientArea(
+                    "Hospital Course",
+                    "hospitalCourse",
+                    "Summary of hospital stay"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 7 - BILLING
+// ==========================================
+
+    else if (page === 7) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Bill Date",
+                    "billDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Bill Number",
+                    "billNumber",
+                    "text",
+                    "Bill number"
+                )}
+
+                ${patientField(
+                    "Consultation Fee",
+                    "consultationFee",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Investigation Charges",
+                    "investigationCharges",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Procedure / Surgery Charges",
+                    "procedureCharges",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Room / Bed Charges",
+                    "roomCharges",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Pharmacy Charges",
+                    "pharmacyCharges",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Other Charges",
+                    "otherCharges",
+                    "number",
+                    "Amount"
+                )}
+
+                ${patientField(
+                    "Discount",
+                    "discount",
+                    "number",
+                    "Discount amount"
+                )}
+
+                ${patientField(
+                    "Amount Paid",
+                    "amountPaid",
+                    "number",
+                    "Paid amount"
+                )}
+
+                ${patientField(
+                    "Payment Mode",
+                    "paymentMode",
+                    "text",
+                    "Cash / UPI / Card"
+                )}
+
+                ${patientField(
+                    "Balance Amount",
+                    "balanceAmount",
+                    "number",
+                    "Balance"
+                )}
+
+                ${patientArea(
+                    "Billing Notes",
+                    "billingNotes",
+                    "Additional billing details"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 8 - FOLLOW-UP
+// ==========================================
+
+    else if (page === 8) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Follow-up Date",
+                    "followupDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Next Appointment",
+                    "nextAppointment",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Follow-up Doctor",
+                    "followupDoctor",
+                    "text",
+                    "Doctor name"
+                )}
+
+                ${patientField(
+                    "Review Type",
+                    "reviewType",
+                    "text",
+                    "Routine / Post-operative / Other"
+                )}
+
+                ${patientArea(
+                    "Patient Condition",
+                    "followupCondition",
+                    "Current patient condition"
+                )}
+
+                ${patientArea(
+                    "Progress / Findings",
+                    "followupProgress",
+                    "Progress since previous visit"
+                )}
+
+                ${patientArea(
+                    "Medicines Continued / Changed",
+                    "followupMedicines",
+                    "Medicines and changes"
+                )}
+
+                ${patientArea(
+                    "Advice",
+                    "followupAdvice",
+                    "Follow-up advice"
+                )}
+
+                ${patientArea(
+                    "Next Plan",
+                    "followupPlan",
+                    "Next treatment or review plan"
+                )}
+
+                ${patientArea(
+                    "Doctor's Follow-up Notes",
+                    "followupDoctorNotes",
+                    "Doctor's notes"
+                )}
+
+            </div>
+
+        `;
+    }// ==========================================
+// PAGE 9 - DISCHARGE SUMMARY
+// ==========================================
+
+    else if (page === 9) {
+
+        content = `
+
+            <div class="record-grid">
+
+                ${patientField(
+                    "Admission Date",
+                    "dischargeAdmissionDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Discharge Date",
+                    "dischargeDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Discharge Time",
+                    "dischargeTime",
+                    "time"
+                )}
+
+                ${patientField(
+                    "Discharge Type",
+                    "dischargeType",
+                    "text",
+                    "Routine / LAMA / Transfer"
+                )}
+
+                ${patientArea(
+                    "Final Diagnosis",
+                    "finalDiagnosis",
+                    "Final diagnosis"
+                )}
+
+                ${patientArea(
+                    "Presenting Complaints",
+                    "dischargeComplaints",
+                    "Presenting complaints"
+                )}
+
+                ${patientArea(
+                    "History & Clinical Findings",
+                    "dischargeClinicalFindings",
+                    "History and clinical findings"
+                )}
+
+                ${patientArea(
+                    "Investigations",
+                    "dischargeInvestigations",
+                    "Important investigation findings"
+                )}
+
+                ${patientArea(
+                    "Procedure / Surgery",
+                    "dischargeProcedure",
+                    "Procedure or surgery performed"
+                )}
+
+                ${patientArea(
+                    "Hospital Course",
+                    "dischargeHospitalCourse",
+                    "Summary of treatment and hospital course"
+                )}
+
+                ${patientArea(
+                    "Condition at Discharge",
+                    "conditionAtDischarge",
+                    "Patient condition at discharge"
+                )}
+
+                ${patientArea(
+                    "Medicines at Discharge",
+                    "dischargeMedicines",
+                    "Medicines prescribed at discharge"
+                )}
+
+                ${patientArea(
+                    "Discharge Advice",
+                    "dischargeAdvice",
+                    "Advice to patient"
+                )}
+
+                ${patientArea(
+                    "Follow-up Instructions",
+                    "dischargeFollowup",
+                    "Follow-up date and instructions"
+                )}
+
+                ${patientArea(
+                    "Additional Notes",
+                    "dischargeAdditionalNotes",
+                    "Additional discharge information"
+                )}
+
+            </div>
+
+            <div class="record-signatures">
+
+                <div>
+                    <strong>Doctor Signature</strong>
+                    <br><br>
+                    __________________________
+                </div>
+
+                <div>
+                    <strong>Patient / Attendant Signature</strong>
+                    <br><br>
+                    __________________________
+                </div>
+
+            </div>
+
+        `;
+    }// ==========================================
+// PATIENT RECORD DISPLAY & NAVIGATION
+// ==========================================
+
+    app.innerHTML = patientPaper(
+        title,
+        content,
+        page
+    );
+loadPatientRecord();
+    app.innerHTML += `
+
+        <div class="record-navigation">
+
+            <button
+                class="record-action-button"
+                onclick="showPage('home')">
+                🏠 Home
+            </button>
+
+            <button
+                class="record-action-button"
+                onclick="showPatientRecord(${page > 1 ? page - 1 : 1})">
+                ◀ Previous
+            </button>
+
+            <span class="record-page-count">
+                Page ${page} of 9
+            </span>
+
+            <button
+                class="record-action-button"
+                onclick="showPatientRecord(${page < 9 ? page + 1 : 9})">
+                Next ▶
+            </button>
+
+            <button
+                class="record-action-button"
+                onclick="window.print()">
+                🖨 Print
+            </button>
+<button
+    class="record-action-button"
+    onclick="savePatientRecord()">
+    💾 Save Patient Record
+</button>
+        </div>
+
+    `;
+
+}// ==========================================
+// SAVE PATIENT RECORD
+// ==========================================
+
+function savePatientRecord() {
+
+    const fields = document.querySelectorAll(
+        "[data-record]"
+    );
+
+    const record = {};
+
+    fields.forEach(field => {
+
+        record[field.dataset.record] =
+            field.value;
+
+    });
+
+    localStorage.setItem(
+        "ksuvidhaPatientRecord",
+        JSON.stringify(record)
+    );
+
+    alert(
+        "Patient Record saved successfully."
+    );
+}// ==========================================
+// LOAD SAVED PATIENT RECORD
+// ==========================================
+
+function loadPatientRecord() {
+
+    const saved =
+        localStorage.getItem(
+            "ksuvidhaPatientRecord"
+        );
+
+    if (!saved) {
+        return;
+    }
+
+    const record = JSON.parse(saved);
+
+    Object.keys(record).forEach(fieldName => {
+
+        const field =
+            document.querySelector(
+                `[data-record="${fieldName}"]`
+            );
+
+        if (field) {
+            field.value = record[fieldName];
+        }
+
+    });
+}
         // ==========================================
 // DISCHARGE SUMMARY
 // ==========================================
