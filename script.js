@@ -1040,8 +1040,45 @@ function showFollowup() {
     `;
 }
 
-
 // ==========================================
+// PATIENT RECORD SYSTEM
+// ==========================================
+
+const patientRecordPages = [
+    "Front Page",
+    "Registration",
+    "Consultation",
+    "X-Ray / Blood / Investigations",
+    "Prescription / Pharmacy",
+    "Admission & Treatment",
+    "Billing",
+    "Follow-up",
+    "Discharge Summary"
+];
+
+function patientField(label, field, type = "text", placeholder = "") {
+    return `
+        <label class="record-field">
+            <span>${label}</span>
+            <input
+                type="${type}"
+                data-record="${field}"
+                placeholder="${placeholder}">
+        </label>
+    `;
+}
+
+function patientArea(label, field, placeholder = "") {
+    return `
+        <label class="record-field record-full">
+            <span>${label}</span>
+            <textarea
+                data-record="${field}"
+                placeholder="${placeholder}"></textarea>
+        </label>
+    `;
+}  
+        // ==========================================
 // DISCHARGE SUMMARY
 // ==========================================
 
