@@ -1077,7 +1077,194 @@ function patientArea(label, field, placeholder = "") {
                 placeholder="${placeholder}"></textarea>
         </label>
     `;
-}  
+} function patientPaper(title, content, pageNumber) {
+
+    return `
+
+        <div class="patient-paper">
+
+            <!-- HOSPITAL HEADER -->
+
+            <div class="record-top">
+
+                <div class="record-logo">
+
+                    <img
+                        src="image.png"
+                        alt="K. Suvidha Hospital Logo">
+
+                </div>
+
+                <div class="record-hospital">
+
+                    <div class="record-kannada">
+                        ಕೆ. ಸುವಿಧಾ ಸೂಪರ್ ಸ್ಪെഷ്യಾಲಿಟಿ ಆಸ್ಪತ್ರೆ
+                    </div>
+
+                    <h1>
+                        K. SUVIDHA SUPER SPECIALITY ORTHOPAEDIC
+                        & MULTISPECIALITY HOSPITAL
+                    </h1>
+
+                </div>
+
+            </div>
+
+            <div class="record-doctors">
+
+                <div>
+
+                    <strong>
+                        Dr. Anirudh C. Kulkarni
+                    </strong>
+
+                    <br>
+                    M.B.B.S., DNB (Ortho) Bangalore
+
+                    <br>
+                    Fellowship in Joint Replacement (Mumbai)
+
+                    <br>
+                    Fellowship in Arthroscopy (France)
+
+                    <br>
+                    Consultant: Orthopaedic, Trauma and
+                    Joint Replacement Surgeon
+
+                    <br>
+                    Medical Director
+
+                </div>
+
+                <div class="record-doctor-right">
+
+                    <strong>
+                        K. Suvidha Hospital
+                    </strong>
+
+                    <br>
+                    Orthopaedic & Multispeciality Hospital
+
+                    <br>
+                    Trauma & Joint Replacement Care
+
+                </div>
+
+            </div>
+
+
+            <!-- PATIENT DETAILS -->
+
+            <div class="record-patient-header">
+
+                ${patientField(
+                    "Patient Name",
+                    "patientName",
+                    "text",
+                    "Patient name"
+                )}
+
+                ${patientField(
+                    "UHID",
+                    "uhid",
+                    "text",
+                    "Patient ID"
+                )}
+
+                ${patientField(
+                    "Age",
+                    "age",
+                    "number",
+                    "Age"
+                )}
+
+                ${patientField(
+                    "Sex",
+                    "sex",
+                    "text",
+                    "Male / Female"
+                )}
+
+                ${patientField(
+                    "Date",
+                    "recordDate",
+                    "date"
+                )}
+
+                ${patientField(
+                    "Weight",
+                    "weight",
+                    "text",
+                    "Kg"
+                )}
+
+                ${patientField(
+                    "B.P.",
+                    "bp",
+                    "text",
+                    "BP"
+                )}
+
+                ${patientField(
+                    "Pulse",
+                    "pulse",
+                    "text",
+                    "Pulse"
+                )}
+
+            </div>
+
+
+            <!-- PAGE TITLE -->
+
+            <div class="record-page-title">
+
+                <span>${pageNumber}</span>
+
+                <strong>${title}</strong>
+
+            </div>
+
+
+            <!-- PAGE CONTENT -->
+
+            <div class="record-content">
+
+                ${content}
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="record-footer">
+
+                <strong>
+                    For Appointment Contact:
+                    08532-452534 / 8555829814 / 7975534201
+                </strong>
+
+                <br>
+
+                #1-3-580/2/1, Padmavathi Extension Colony,
+                Ashapur Road, Near IOC Petrol Bunk,
+                RAICHUR - 584 101
+
+                <br>
+
+                Emergency Fracture / Accident Care:
+                9008399299
+
+                <br>
+
+                Email:
+                ksuvidhahospitalrcr2024@gmail.com
+
+            </div>
+
+        </div>
+    `;
+} 
         // ==========================================
 // DISCHARGE SUMMARY
 // ==========================================
