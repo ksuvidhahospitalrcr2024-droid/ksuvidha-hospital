@@ -98,25 +98,33 @@ function showHome() {
                     treatment.
                 </p>
 
-                <div class="hero-buttons">
+           <div class="hero-buttons">
 
-                    <button
-                        class="primary-button"
-                        onclick="showPage('registration')">
+    <button
+        class="primary-button"
+        onclick="showPage('patient-record')">
 
-                        Register Patient
+        📁 PATIENTS RECORD
 
-                    </button>
+    </button>
 
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('consultation')">
+    <button
+        class="secondary-button"
+        onclick="showPage('registration')">
 
-                        Start Consultation
+        Register Patient
 
-                    </button>
+    </button>
 
-                </div>
+    <button
+        class="secondary-button"
+        onclick="showPage('consultation')">
+
+        Start Consultation
+
+    </button>
+
+</div>    
 
                 <div class="emergency">
                     🚑 24/7 Emergency Accident & Fracture Care
