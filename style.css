@@ -1,0 +1,671 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f6f8;
+    color: #243746;
+}
+
+/* HEADER */
+
+.header {
+    height: 75px;
+    background: white;
+    border-bottom: 1px solid #d9e1e6;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 25px;
+
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #c95b2d;
+    color: white;
+
+    border: 5px solid #e3ad7d;
+
+    font-weight: bold;
+}
+
+.logo-area h2 {
+    margin: 0;
+    color: #174f75;
+    font-size: 20px;
+}
+
+.logo-area p {
+    margin: 2px 0 0;
+    font-size: 10px;
+    color: #7c4b35;
+    letter-spacing: 1px;
+}
+
+.menu-button {
+    border: none;
+    background: transparent;
+    font-size: 30px;
+    color: #174f75;
+    cursor: pointer;
+}
+
+
+/* SIDE MENU */
+
+.side-menu {
+    position: fixed;
+    right: 0;
+    top: 0;
+
+    width: 310px;
+    height: 100vh;
+
+    background: white;
+
+    box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+
+    padding: 25px;
+
+    transform: translateX(100%);
+
+    transition: 0.3s;
+
+    z-index: 200;
+}
+
+.side-menu.open {
+    transform: translateX(0);
+}
+
+.side-menu h3 {
+    color: #174f75;
+    margin-top: 35px;
+}
+
+.side-menu button:not(.close-button) {
+    display: block;
+
+    width: 100%;
+
+    border: none;
+
+    background: #f1f5f7;
+
+    margin: 8px 0;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    color: #243746;
+}
+
+.side-menu button:hover {
+    background: #e5edf2;
+}
+
+.side-menu .last-menu {
+    border-left: 5px solid #c95b2d !important;
+}
+
+.close-button {
+    float: right;
+
+    border: none;
+
+    background: none;
+
+    font-size: 30px;
+
+    cursor: pointer;
+
+    color: #174f75;
+}
+
+
+/* HOME */
+
+.hero {
+    max-width: 1200px;
+
+    margin: 30px auto;
+
+    padding: 40px;
+
+    display: grid;
+
+    grid-template-columns: 1.2fr 0.8fr;
+
+    gap: 30px;
+
+    background: linear-gradient(
+        110deg,
+        white 0%,
+        white 65%,
+        #edf5f8 65%
+    );
+
+    border-radius: 20px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.hero h1 {
+    color: #174f75;
+
+    font-size: 42px;
+
+    line-height: 1.1;
+
+    margin: 10px 0;
+}
+
+.hero p {
+    color: #637681;
+    font-size: 17px;
+}
+
+.eyebrow {
+    color: #c95b2d;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    font-size: 12px;
+}
+
+.hero-buttons {
+    margin-top: 25px;
+
+    display: flex;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+.primary-button,
+.secondary-button {
+    padding: 14px 20px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+.primary-button {
+    background: #174f75;
+    color: white;
+}
+
+.secondary-button {
+    background: #e8eef2;
+    color: #174f75;
+}
+
+.emergency {
+    margin-top: 25px;
+
+    color: #a94828;
+
+    font-weight: bold;
+}
+
+.hero-image img {
+    width: 100%;
+
+    max-height: 500px;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+
+    border: 1px solid #d4dde2;
+}
+
+
+/* QUICK MENU */
+
+.quick-menu {
+    max-width: 1200px;
+
+    margin: 0 auto 50px;
+
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 15px;
+}
+
+.quick-card {
+    background: white;
+
+    border: 1px solid #dce4e8;
+
+    border-radius: 14px;
+
+    padding: 22px;
+
+    min-height: 145px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+
+    transition: 0.2s;
+}
+
+.quick-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.quick-card .icon {
+    font-size: 28px;
+
+    display: block;
+
+    margin-bottom: 12px;
+}
+
+.quick-card strong {
+    color: #174f75;
+
+    display: block;
+}
+
+.quick-card small {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #70818a;
+}
+
+.discharge-card {
+    border-top: 4px solid #c95b2d;
+}
+
+
+/* INTERNAL PAGES */
+
+.page {
+    max-width: 1100px;
+
+    margin: 35px auto;
+
+    padding: 0 20px 50px;
+}
+
+.page-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    color: #174f75;
+    margin: 5px 0;
+}
+
+.page-header p {
+    color: #70818a;
+}
+
+.patient-id {
+    background: #e7f0f5;
+
+    color: #174f75;
+
+    padding: 9px 15px;
+
+    border-radius: 20px;
+
+    font-weight: bold;
+}
+
+
+/* FORM */
+
+.document {
+    background: white;
+
+    border-radius: 15px;
+
+    border: 1px solid #d8e1e6;
+
+    overflow: hidden;
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.document-header {
+    background: linear-gradient(
+        100deg,
+        #edf7fa,
+        #fff0e7
+    );
+
+    padding: 20px;
+
+    border-bottom: 3px solid #c95b2d;
+
+    color: #174f75;
+
+    font-weight: bold;
+}
+
+.form {
+    padding: 25px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+}
+
+.form label {
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #536b78;
+}
+
+.form input,
+.form textarea,
+.form select {
+    width: 100%;
+
+    margin-top: 7px;
+
+    padding: 12px;
+
+    border-radius: 7px;
+
+    border: 1px solid #cbd8df;
+
+    background: #fbfcfd;
+
+    font-size: 14px;
+}
+
+.form textarea {
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.save-button {
+    margin: 0 25px 25px;
+
+    padding: 13px 20px;
+
+    background: #174f75;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+
+/* DISCHARGE SUMMARY */
+
+.discharge-paper {
+    background: white;
+
+    border: 1px solid #cbd6dc;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.paper-header {
+    padding: 25px;
+
+    display: flex;
+
+    gap: 18px;
+
+    align-items: center;
+
+    background: linear-gradient(
+        105deg,
+        #eef7fb 0%,
+        #eef7fb 57%,
+        #fce9dd 57%
+    );
+}
+
+.paper-logo {
+    width: 70px;
+
+    height: 70px;
+
+    border-radius: 50%;
+
+    border: 5px solid #d18b5c;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #b34e28;
+
+    font-weight: bold;
+}
+
+.paper-header h2 {
+    margin: 5px 0;
+
+    color: #174f75;
+
+    font-size: 21px;
+}
+
+.paper-header p {
+    margin: 0;
+
+    font-size: 11px;
+
+    color: #536875;
+}
+
+.kannada {
+    color: #7a3f29;
+
+    font-size: 13px;
+
+    font-weight: bold;
+}
+
+.blue-line {
+    height: 4px;
+
+    background: #174f75;
+}
+
+.patient-details {
+    padding: 15px 20px;
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 25px;
+
+    border-bottom: 1px solid #dce3e7;
+
+    font-size: 12px;
+}
+
+.summary {
+    padding: 20px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 20px;
+}
+
+.summary-section {
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #536875;
+}
+
+.line {
+    height: 45px;
+
+    border-bottom: 1px dashed #899aa3;
+
+    margin-top: 5px;
+}
+
+.large-line {
+    height: 75px;
+}
+
+.full-section {
+    grid-column: 1 / -1;
+}
+
+.signature {
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 45px 30px 20px;
+
+    font-size: 12px;
+
+    color: #536875;
+}
+
+.paper-footer {
+    text-align: center;
+
+    padding: 15px;
+
+    background: linear-gradient(
+        90deg,
+        #e7f1f6,
+        #f7e4d8
+    );
+
+    border-top: 2px solid #c95b2d;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+}
+
+
+/* MOBILE */
+
+@media(max-width: 850px) {
+
+    .hero {
+        grid-template-columns: 1fr;
+
+        margin: 15px;
+
+        padding: 25px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .quick-menu {
+        grid-template-columns: repeat(2, 1fr);
+
+        margin: 15px;
+    }
+
+}
+
+@media(max-width: 550px) {
+
+    .quick-menu {
+        grid-template-columns: 1fr;
+    }
+
+    .form {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .full-section {
+        grid-column: auto;
+    }
+
+    .paper-header h2 {
+        font-size: 15px;
+    }
+
+}
