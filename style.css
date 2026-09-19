@@ -683,3 +683,441 @@ body {
     object-position: center top;
     display: block;
 }
+/* ==========================================
+   PATIENT RECORD - HOSPITAL PAPER DESIGN
+   ========================================== */
+
+.patient-paper {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 14mm 14mm 12mm 14mm;
+    box-sizing: border-box;
+
+    background: #ffffff;
+    color: #111111;
+
+    border: 1px solid #cccccc;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* ------------------------------------------
+   HOSPITAL HEADER
+   ------------------------------------------ */
+
+.record-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1f4e79;
+}
+
+.record-logo {
+    width: 75px !important;
+    height: 75px !important;
+    min-width: 75px !important;
+
+    overflow: hidden;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.record-logo img {
+    width: 75px !important;
+    height: 75px !important;
+
+    object-fit: cover;
+    object-position: center top;
+
+    display: block;
+}
+
+.record-hospital {
+    flex: 1;
+    text-align: center;
+}
+
+.record-kannada {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.record-hospital h1 {
+    margin: 0;
+
+    font-size: 21px;
+    line-height: 1.25;
+
+    color: #173f63;
+    font-weight: 700;
+}
+
+/* ------------------------------------------
+   DOCTOR DETAILS
+   ------------------------------------------ */
+
+.record-doctors {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #777777;
+
+    font-size: 12px;
+}
+
+.record-doctor-right {
+    text-align: right;
+}
+
+/* ------------------------------------------
+   PATIENT DETAILS
+   ------------------------------------------ */
+
+.record-patient-header {
+    display: grid;
+
+    grid-template-columns:
+        2fr
+        1fr
+        0.7fr
+        0.8fr
+        1fr
+        0.8fr
+        0.8fr
+        0.8fr;
+
+    gap: 8px;
+
+    padding: 12px 0;
+
+    border-bottom: 2px solid #333333;
+}
+
+/* ------------------------------------------
+   ALL RECORD FIELDS
+   ------------------------------------------ */
+
+.record-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.record-field span {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.record-field input,
+.record-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 7px 8px;
+
+    border: 1px solid #888888;
+    border-radius: 2px;
+
+    background: #ffffff;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+
+    color: #111111;
+}
+
+.record-field textarea {
+    min-height: 75px;
+    resize: vertical;
+}
+
+.record-field input:focus,
+.record-field textarea:focus {
+    outline: none;
+    border: 2px solid #1f4e79;
+}
+
+/* ------------------------------------------
+   PAGE TITLE
+   ------------------------------------------ */
+
+.record-page-title {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 14px 0;
+
+    padding: 8px 10px;
+
+    background: #eef4f8;
+
+    border-left: 5px solid #1f4e79;
+
+    font-size: 16px;
+}
+
+.record-page-title span {
+    font-weight: 700;
+}
+
+.record-page-title strong {
+    font-size: 17px;
+}
+
+/* ------------------------------------------
+   PAGE CONTENT
+   ------------------------------------------ */
+
+.record-content {
+    width: 100%;
+}
+
+/* ------------------------------------------
+   NORMAL RECORD GRID
+   ------------------------------------------ */
+
+.record-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 14px 18px;
+
+    width: 100%;
+}
+
+.record-full {
+    grid-column: 1 / -1;
+}
+
+/* ------------------------------------------
+   FRONT PAGE
+   ------------------------------------------ */
+
+.record-front-grid {
+    display: grid;
+
+    grid-template-columns: 32% 68%;
+
+    gap: 20px;
+
+    width: 100%;
+}
+
+.services-column {
+    border-right: 1px solid #999999;
+
+    padding-right: 18px;
+}
+
+.services-column h3 {
+    margin: 0 0 10px 0;
+
+    padding: 6px 8px;
+
+    background: #eef4f8;
+
+    border-bottom: 2px solid #1f4e79;
+
+    font-size: 15px;
+}
+
+.services-column p {
+    margin: 7px 0;
+
+    font-size: 12px;
+}
+
+.front-main {
+    padding-left: 5px;
+}
+
+.rx-symbol {
+    text-align: center;
+
+    font-size: 50px;
+    font-weight: bold;
+
+    margin-bottom: 15px;
+
+    color: #1f4e79;
+}
+
+/* ------------------------------------------
+   FOOTER
+   ------------------------------------------ */
+
+.record-footer {
+    margin-top: 25px;
+
+    padding-top: 10px;
+
+    border-top: 2px solid #333333;
+
+    text-align: center;
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* ------------------------------------------
+   NAVIGATION BUTTONS
+   ------------------------------------------ */
+
+.record-navigation {
+    width: 210mm;
+
+    margin: 15px auto 30px auto;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+.record-action-button {
+    padding: 9px 15px;
+
+    border: none;
+    border-radius: 4px;
+
+    background: #1f4e79;
+    color: white;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+.record-action-button:hover {
+    opacity: 0.85;
+}
+
+.record-page-count {
+    padding: 8px 12px;
+
+    font-weight: 700;
+
+    background: #eeeeee;
+
+    border-radius: 4px;
+}
+
+/* ------------------------------------------
+   SIGNATURES
+   ------------------------------------------ */
+
+.record-signatures {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 35px;
+
+    padding-top: 15px;
+}
+
+.record-signatures > div {
+    width: 40%;
+
+    text-align: center;
+}
+
+/* ------------------------------------------
+   PRINT
+   ------------------------------------------ */
+
+@media print {
+
+    body {
+        background: white !important;
+    }
+
+    .patient-paper {
+        width: 210mm;
+        min-height: 297mm;
+
+        margin: 0;
+        padding: 10mm;
+
+        border: none;
+        box-shadow: none;
+    }
+
+    .record-navigation {
+        display: none !important;
+    }
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+}
+
+/* ------------------------------------------
+   MOBILE
+   ------------------------------------------ */
+
+@media screen and (max-width: 900px) {
+
+    .patient-paper {
+        width: 95%;
+        min-height: auto;
+
+        margin: 15px auto;
+        padding: 20px;
+    }
+
+    .record-patient-header {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .record-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .record-front-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .services-column {
+        border-right: none;
+        border-bottom: 1px solid #999999;
+
+        padding-right: 0;
+        padding-bottom: 15px;
+    }
+
+    .record-doctors {
+        flex-direction: column;
+    }
+
+    .record-doctor-right {
+        text-align: left;
+    }
+
+    .record-navigation {
+        width: 95%;
+    }
+}
