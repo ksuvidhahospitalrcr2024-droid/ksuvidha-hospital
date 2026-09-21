@@ -6859,3 +6859,168 @@ if (originalShowSuvidha) {
         };
 
 }
+function showSuvidha() {
+    app.innerHTML = `
+        <div class="suvidha-page">
+
+            <div class="suvidha-header">
+                <img src="image.png" alt="K. Suvidha Hospital">
+                <div>
+                    <h1>🤖 SUVIDHA AI</h1>
+                    <p>Hospital Software Assistant</p>
+                </div>
+            </div>
+
+            <div class="suvidha-card">
+                <h2>Hello! I am SUVIDHA 👋</h2>
+
+                <p>
+                    I am the digital assistant of
+                    <strong>K. Suvidha Hospital</strong>.
+                </p>
+
+                <p>
+                    I can help hospital staff understand and use
+                    this hospital software.
+                </p>
+
+                <div class="suvidha-questions">
+                    <button onclick="suvidhaAsk('What is Patients Record?')">
+                        📁 Patients Record
+                    </button>
+
+                    <button onclick="suvidhaAsk('How do I register a patient?')">
+                        🧑‍⚕️ Patient Registration
+                    </button>
+
+                    <button onclick="suvidhaAsk('How does billing work?')">
+                        💰 Billing
+                    </button>
+
+                    <button onclick="suvidhaAsk('What can you do?')">
+                        🤖 What can you do?
+                    </button>
+
+                    <button onclick="suvidhaAsk('Who created you?')">
+                        👨‍💻 Who created you?
+                    </button>
+                </div>
+
+                <div id="suvidha-chat" class="suvidha-chat">
+                    <div class="suvidha-message">
+                        <strong>SUVIDHA:</strong>
+                        Hello! Ask me something about the hospital software.
+                    </div>
+                </div>
+
+                <div class="suvidha-input">
+                    <input
+                        id="suvidha-input"
+                        type="text"
+                        placeholder="Ask SUVIDHA..."
+                        onkeydown="if(event.key==='Enter') suvidhaAsk()">
+
+                    <button onclick="suvidhaAsk()">
+                        Send
+                    </button>
+                </div>
+
+                <button
+                    class="record-action-button"
+                    onclick="showPage('home')">
+                    🏠 Back to Home
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function suvidhaAsk(question) {
+
+    const input = document.getElementById("suvidha-input");
+
+    if (!question && input) {
+        question = input.value.trim();
+    }
+
+    if (!question) return;
+
+    let answer = "";
+
+    const q = question.toLowerCase();
+
+    if (q.includes("who are you") || q.includes("what are you")) {
+
+        answer =
+            "I am SUVIDHA, the digital assistant of K. Suvidha Hospital. " +
+            "I help staff understand and use the hospital software.";
+
+    } else if (q.includes("created") || q.includes("creator")) {
+
+        answer =
+            "I was designed for K. Suvidha Hospital by Sutej AK.";
+
+    } else if (q.includes("patient record")) {
+
+        answer =
+            "Patients Record is the main patient file. It contains registration, " +
+            "consultation, investigations, prescription, admission and treatment, " +
+            "billing, follow-up and discharge summary.";
+
+    } else if (q.includes("registration") || q.includes("register")) {
+
+        answer =
+            "Use Patient Registration to enter the patient's basic details such as " +
+            "name, UHID, age, sex, address and other registration information.";
+
+    } else if (q.includes("billing") || q.includes("bill")) {
+
+        answer =
+            "Billing allows you to enter fixed hospital items, quantity and rate. " +
+            "The amount and bill totals are calculated automatically.";
+
+    } else if (q.includes("what can you do") || q.includes("capabilities")) {
+
+        answer =
+            "I can explain Patients Record, Registration, Consultation, " +
+            "Investigations, Prescription, Admission & Treatment, Billing, " +
+            "Follow-up and Discharge Summary.";
+
+    } else {
+
+        answer =
+            "I am SUVIDHA, the hospital software assistant. " +
+            "Please ask me about Patients Record, Registration, Billing, " +
+            "Consultation, Investigations, Pharmacy, Admission, Follow-up or Discharge.";
+
+    }
+
+    const chat = document.getElementById("suvidha-chat");
+
+    if (chat) {
+        chat.innerHTML += `
+            <div class="suvidha-message">
+                <strong>You:</strong> ${escapeSuvidhaHTML(question)}
+            </div>
+
+            <div class="suvidha-message suvidha-answer">
+                <strong>SUVIDHA:</strong> ${answer}
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    if (input) {
+        input.value = "";
+    }
+}
+
+function escapeSuvidhaHTML(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
