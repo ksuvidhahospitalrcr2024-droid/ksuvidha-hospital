@@ -843,118 +843,471 @@ function showAdmission() {
 // BILLING
 // ==========================================
 
+// ==========================================
+// OT BILLING SYSTEM
+// ==========================================
+
 function showBilling() {
 
     app.innerHTML = `
 
         <section class="page">
 
-            ${pageHeader(
-                "Hospital Billing",
-                "Record hospital charges and payments"
-            )}
+            <div class="page-header">
+
+                <div>
+                    <h1>OT BILL / MEDICINE REPLACEMENT</h1>
+                    <p>K. Suvidha Hospital</p>
+                </div>
+
+                <div class="patient-id">
+                    KSVUH
+                </div>
+
+            </div>
+
 
             <div class="document">
 
                 <div class="document-header">
-                    Billing Statement
+                    OT BILL
                 </div>
+
 
                 <div class="form">
 
                     <label>
                         Patient Name
-                        <input placeholder="Patient name">
+                        <input
+                            id="otPatientName"
+                            type="text"
+                            placeholder="Enter patient name">
                     </label>
+
+
+                    <label>
+                        Doctor Name
+                        <input
+                            id="otDoctorName"
+                            type="text"
+                            placeholder="Doctor name">
+                    </label>
+
 
                     <label>
                         Bill Date
-                        <input type="date">
+                        <input
+                            id="otBillDate"
+                            type="date">
                     </label>
+
 
                     <label>
-                        Registration Charges
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label>
-                        Consultation Charges
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label>
-                        Investigation Charges
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label>
-                        Room Charges
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label>
-                        Surgery / Procedure
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label>
-                        Pharmacy
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label class="full">
-                        Other Charges
-                        <input type="number" placeholder="₹">
-                    </label>
-
-                    <label class="full">
-                        Payment Notes
-                        <textarea
-                            placeholder="Payment details"></textarea>
+                        OT / Procedure
+                        <input
+                            id="otProcedure"
+                            type="text"
+                            placeholder="Procedure name">
                     </label>
 
                 </div>
 
-                <button
-                    class="save-button"
-                    onclick="calculateBill()">
 
-                    Calculate / Save Bill
+                <h3>OT ITEMS / MEDICINES</h3>
 
-                </button>
+
+                <div class="ot-bill-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Sl.</th>
+                                <th>Item / Medicine</th>
+                                <th>Qty</th>
+                                <th>Rate</th>
+                                <th>Amount</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="otBillItems">
+
+                            <tr>
+
+                                <td>1</td>
+
+                                <td>
+                                    <input
+                                        class="ot-item"
+                                        placeholder="Item / Medicine">
+                                </td>
+
+                                <td>
+                                    <input
+                                        class="ot-qty"
+                                        type="number"
+                                        min="0"
+                                        value="1"
+                                        oninput="calculateOTBill()">
+                                </td>
+
+                                <td>
+                                    <input
+                                        class="ot-rate"
+                                        type="number"
+                                        min="0"
+                                        value="0"
+                                        oninput="calculateOTBill()">
+                                </td>
+
+                                <td>
+                                    <input
+                                        class="ot-amount"
+                                        type="number"
+                                        value="0"
+                                        readonly>
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <div class="ot-bill-buttons">
+
+                    <button
+                        class="save-button"
+                        onclick="addOTBillRow()">
+                        + Add Item
+                    </button>
+
+                    <button
+                        class="save-button"
+                        onclick="calculateOTBill()">
+                        Calculate
+                    </button>
+
+                </div>
+
+
+                <div class="ot-bill-total">
+
+                    <strong>
+                        TOTAL:
+                    </strong>
+
+                    <input
+                        id="otBillTotal"
+                        type="number"
+                        value="0"
+                        readonly>
+
+                </div>
+
+
+                <div class="form">
+
+                    <label>
+                        Amount Paid
+                        <input
+                            id="otAmountPaid"
+                            type="number"
+                            min="0"
+                            value="0"
+                            oninput="calculateOTBalance()">
+                    </label>
+
+
+                    <label>
+                        Balance
+                        <input
+                            id="otBalance"
+                            type="number"
+                            value="0"
+                            readonly>
+                    </label>
+
+
+                    <label>
+                        Payment Mode
+                        <input
+                            id="otPaymentMode"
+                            type="text"
+                            placeholder="Cash / UPI / Card">
+                    </label>
+
+
+                    <label class="full">
+                        Billing Notes
+                        <textarea
+                            id="otBillingNotes"
+                            placeholder="Additional billing details"></textarea>
+                    </label>
+
+                </div>
+
+
+                <div class="ot-bill-buttons">
+
+                    <button
+                        class="save-button"
+                        onclick="saveOTBill()">
+                        💾 Save OT Bill
+                    </button>
+
+
+                    <button
+                        class="save-button"
+                        onclick="window.print()">
+                        🖨 Print Bill
+                    </button>
+
+                </div>
 
             </div>
 
         </section>
+
     `;
 }
 
 
 // ==========================================
-// BILL CALCULATION
+// ADD OT BILL ITEM
 // ==========================================
 
-function calculateBill() {
+function addOTBillRow() {
 
-    const inputs =
+    const table =
+        document.getElementById("otBillItems");
+
+    const rowNumber =
+        table.children.length + 1;
+
+    const row =
+        document.createElement("tr");
+
+    row.innerHTML = `
+
+        <td>${rowNumber}</td>
+
+        <td>
+            <input
+                class="ot-item"
+                placeholder="Item / Medicine">
+        </td>
+
+        <td>
+            <input
+                class="ot-qty"
+                type="number"
+                min="0"
+                value="1"
+                oninput="calculateOTBill()">
+        </td>
+
+        <td>
+            <input
+                class="ot-rate"
+                type="number"
+                min="0"
+                value="0"
+                oninput="calculateOTBill()">
+        </td>
+
+        <td>
+            <input
+                class="ot-amount"
+                type="number"
+                value="0"
+                readonly>
+        </td>
+
+    `;
+
+    table.appendChild(row);
+}
+
+
+// ==========================================
+// CALCULATE OT BILL
+// ==========================================
+
+function calculateOTBill() {
+
+    const rows =
         document.querySelectorAll(
-            '.form input[type="number"]'
+            "#otBillItems tr"
         );
 
     let total = 0;
 
-    inputs.forEach(input => {
+    rows.forEach(row => {
 
-        const value =
-            parseFloat(input.value) || 0;
+        const qty =
+            Number(
+                row.querySelector(".ot-qty").value
+            ) || 0;
 
-        total += value;
+        const rate =
+            Number(
+                row.querySelector(".ot-rate").value
+            ) || 0;
+
+        const amount =
+            qty * rate;
+
+        row.querySelector(".ot-amount").value =
+            amount;
+
+        total += amount;
 
     });
 
+    document.getElementById(
+        "otBillTotal"
+    ).value = total;
+
+    calculateOTBalance();
+}
+
+
+// ==========================================
+// CALCULATE BALANCE
+// ==========================================
+
+function calculateOTBalance() {
+
+    const total =
+        Number(
+            document.getElementById(
+                "otBillTotal"
+            ).value
+        ) || 0;
+
+    const paid =
+        Number(
+            document.getElementById(
+                "otAmountPaid"
+            ).value
+        ) || 0;
+
+    document.getElementById(
+        "otBalance"
+    ).value =
+        Math.max(total - paid, 0);
+}
+
+
+// ==========================================
+// SAVE OT BILL
+// ==========================================
+
+function saveOTBill() {
+
+    const rows =
+        document.querySelectorAll(
+            "#otBillItems tr"
+        );
+
+    const items = [];
+
+    rows.forEach(row => {
+
+        items.push({
+
+            item:
+                row.querySelector(
+                    ".ot-item"
+                ).value,
+
+            quantity:
+                row.querySelector(
+                    ".ot-qty"
+                ).value,
+
+            rate:
+                row.querySelector(
+                    ".ot-rate"
+                ).value,
+
+            amount:
+                row.querySelector(
+                    ".ot-amount"
+                ).value
+
+        });
+
+    });
+
+
+    const bill = {
+
+        patientName:
+            document.getElementById(
+                "otPatientName"
+            ).value,
+
+        doctorName:
+            document.getElementById(
+                "otDoctorName"
+            ).value,
+
+        billDate:
+            document.getElementById(
+                "otBillDate"
+            ).value,
+
+        procedure:
+            document.getElementById(
+                "otProcedure"
+            ).value,
+
+        items: items,
+
+        total:
+            document.getElementById(
+                "otBillTotal"
+            ).value,
+
+        amountPaid:
+            document.getElementById(
+                "otAmountPaid"
+            ).value,
+
+        balance:
+            document.getElementById(
+                "otBalance"
+            ).value,
+
+        paymentMode:
+            document.getElementById(
+                "otPaymentMode"
+            ).value,
+
+        notes:
+            document.getElementById(
+                "otBillingNotes"
+            ).value
+
+    };
+
+
+    localStorage.setItem(
+        "ksuvidhaOTBill",
+        JSON.stringify(bill)
+    );
+
+
     alert(
-        "Total Bill Amount: ₹" +
-        total.toLocaleString("en-IN")
+        "OT Bill saved successfully."
     );
 }
 
