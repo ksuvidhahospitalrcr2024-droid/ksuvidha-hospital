@@ -847,7 +847,408 @@ function showAdmission() {
 // OT BILLING SYSTEM
 // ==========================================
 
+// ==========================================
+// FIXED OT BILLING SYSTEM
+// EXCEL LIST - NO ADD ITEM
+// ==========================================
+
 function showBilling() {
+
+    const otItems = [
+
+        // ==========================================
+        // OT LIST - I.V. FLUIDS
+        // ==========================================
+        "IV NS 3000 ML",
+        "R.L",
+        "5% DEX",
+        "NS",
+        "Heamaccel",
+        "EP",
+
+        // ==========================================
+        // SUTURE MATERIALS
+        // ==========================================
+        "Catugt No 1",
+        "Catugt No 1-0",
+        "Catugt No 2-0",
+        "Catugt No 2",
+        "Vicryl No 1",
+        "Vicryl No 1-0",
+        "Vicryl No 2-0",
+        "Vicryl No 3-0",
+        "Proline No 1",
+        "Proline No 1-0",
+        "Proline No 2-0",
+        "Proline No 3-0",
+        "Trulon No 3-0",
+        "Mersilk 3-0",
+        "Mersilk 2-0",
+        "Mersilk 1-0",
+        "BonWax",
+        "Ethilon 2-0",
+        "Ethilon",
+        "Proline cutting -1",
+
+        // ==========================================
+        // I.V. CANULA
+        // ==========================================
+        "No -18",
+        "No- 20",
+        "No -22",
+        "Easy fix",
+
+        // ==========================================
+        // DRIP SET
+        // ==========================================
+        "DRIP SET",
+
+        // ==========================================
+        // GLOVES
+        // ==========================================
+        "Dispo glove",
+        "No- 6",
+        "No- 6.5",
+        "No- 7.0",
+        "No- 7.5",
+
+        // ==========================================
+        // SURGICAL BLADE
+        // ==========================================
+        "No 20",
+        "No 22",
+        "No 15",
+        "No 11",
+
+        // ==========================================
+        // OTHER OT ITEMS
+        // ==========================================
+        "ECG Leads",
+        "Oxygen Mask",
+
+        // ==========================================
+        // DISPOSABLE SYRINGES
+        // ==========================================
+        "2 CC",
+        "5 CC",
+        "10 CC",
+        "20 CC",
+        "50 CC",
+        "Insulin Suringe",
+
+        // ==========================================
+        // L.P / BLOCK NEEDLE
+        // ==========================================
+        "L.P.Needle No 25 /23",
+        "18 No Needle -1 and Half \"",
+        "26 No Needle -1 and Half \"",
+        "Epidural Needle",
+
+        // ==========================================
+        // DISTILLED WATER
+        // ==========================================
+        "Distilled Water - 5ml",
+        "Distilled Water - 10ml",
+
+        // ==========================================
+        // INJECTIONS
+        // ==========================================
+        "Inj Gentmycin",
+        "Inj Pyrolet",
+        "Inj Dopa Plus",
+        "Inj Deriphyline",
+        "Inj Calcium Gulconate",
+        "inj Adenosin",
+        "Inj Rantac",
+        "Inj Fortwin",
+        "Inj Anawin Heavy",
+        "Inj Myo Pyrolate",
+        "Inj Butrum",
+        "Inj Voveron",
+        "Inj Emset",
+        "Dynapar",
+        "Propopol",
+        "Midazolam",
+        "Tramadol",
+        "N.T.G",
+        "Esmolol",
+        "Primocort 100mg",
+        "Inj Pause 500mg",
+        "Sucol",
+        "Atracil",
+        "Avil",
+        "Inj Myopyrolate",
+        "Inj Loxicard",
+        "Inj Mephentermine",
+        "Inj Phenpress",
+        "Lasix",
+        "Xylomethazoline nasal drops",
+        "Bupregesic",
+        "Inj Aneket",
+        "Inj Atropine",
+        "Inj Xylocain 2% Vial",
+        "Inj Xylocain + Adr",
+        "Inj Sensorcaine 0.5% Vial",
+        "Inj Sensorcaine 0.25% Vial",
+        "Inj Dexona",
+        "Inj Vitamin -K",
+        "Inj Ceftrion",
+
+        // ==========================================
+        // MISCELLANEOUS
+        // ==========================================
+        "Xylocane jelly",
+        "Betadine Solution",
+        "Scrub",
+        "Spirit",
+        "Hydrogen Peroxide",
+        "Neosprion Ointment",
+        "Bandage Roll 4\" 6\"",
+        "POP 4\" 6\"",
+        "Gamjee Roll 4\" 6\"",
+        "Micropore",
+        "Dynaplast",
+        "Savlon",
+        "Cidex",
+        "Cuticell",
+        "Steri drape",
+        "Skin Staper",
+        "Cap",
+        "Mask",
+        "Green Sheet",
+        "Vaccum suction set",
+        "knee o drape",
+        "Easy Plaster",
+        "Soff Cotton Roll",
+        "Foleys Catheter",
+        "corrugated drane",
+        "Uro Bag",
+        "Feeding Tube",
+        "Chest Drain",
+        "E.T.Tube",
+        "Ryles Tube No",
+        "Suction Drain 14, 16",
+        "Drain No -14",
+        "Drain No -12",
+        "Romovac draine",
+        "C-ARM Cover",
+        "Cling Drape",
+        "Ab gel",
+
+        // ==========================================
+        // O.T. MEDICINE REPLACEMENT
+        // ==========================================
+        "I V Hameaceel 500ml",
+        "I V 5% Dextrose",
+        "I V DNs",
+        "I V NS",
+        "I V RL",
+        "I V Set",
+        "I V Cannula No 20/22/18",
+        "Easy Fix",
+        "Extention Tube",
+        "Easy Glide",
+        "E.T.Tube No",
+
+        "Vicryl",
+        "No 1",
+        "No 1-0",
+        "No 2-0",
+        "No 3-0",
+        "No 4-0",
+
+        "Proline",
+        "No 1",
+        "No 1-0",
+        "No 2-0",
+        "No 3-0",
+
+        "Ethilon RC/RB",
+        "No 1",
+        "No 2-0",
+        "No 3-0",
+
+        "Monocry II",
+        "No. 1-0",
+        "No 2-0",
+        "No 3-0",
+        "No 5-0",
+
+        "ECG Leads",
+        "Romovac Set No 12/14/16",
+        "Scrub",
+        "Betadine",
+        "Spirit",
+        "Top O Plaster",
+        "Blade 22",
+        "Blade 15",
+        "Blade 11",
+        "Crepe Bandage 6'', 4''",
+
+        "Syrnige 2cc",
+        "Syringe 5cc",
+        "Syrnige 10cc",
+        "Syringe 20cc",
+        "Syringe 50cc",
+
+        "O T Caps",
+        "O T Mask",
+
+        // ==========================================
+        // MEDICINE REPLACEMENT - INJECTIONS
+        // ==========================================
+        "Isoflurane",
+        "Inj Carboprost",
+        "Inj Artacil",
+        "Inj Pyrolate",
+        "Inj Avil",
+        "Inj Betnesol",
+        "Inj Dexsona",
+        "Inj Emset",
+        "Inj Dexona",
+        "Inj Mezolam",
+        "Inj Atropine/Tropine",
+        "Inj Hydrocort",
+        "Inj Buprigese",
+        "Inj Lasix",
+        "Inj Aneket",
+        "Inj Butadol",
+        "Inj Pause",
+        "Inj Propofal",
+        "Inj Myopyrolate",
+        "Inj Anawin 0/.5% Vail",
+        "Xylocaine Adr Vail",
+        "Inj Lox 2% Vail",
+        "ZOCEF",
+        "Inj Ropin",
+        "Inj Somol",
+        "Inj Vitamin K",
+        "Anawin (Amp)",
+        "Inj Pan 40",
+        "Inj Tarmazac",
+        "L P Needle No 23",
+        "L P Needle No 25",
+        "Inj Methergin",
+        "Inj Pitocin",
+        "Inj Caboprost",
+        "Inj Justin",
+        "Inj Termin",
+        "Inj Dextoml (Vail)",
+        "Inj Sucol",
+        "Inj Dynapar AQ",
+
+        // ==========================================
+        // MEDICINE REPLACEMENT - OTHER
+        // ==========================================
+        "Corrugated Drainge Sheet",
+        "Supp. Justin 100, 12.5, 25",
+        "Cord Clamp",
+        "Vancomycin",
+        "Cerviprime Gel",
+        "Tab Cytotac",
+        "I V Glycin",
+        "I V NS 3000",
+        "Ioban",
+
+        "Infant Feeding Tube No",
+        "Ryles Tube No",
+        "Uro Bag",
+        "Jelly",
+        "Foley's Catheter No 14/16",
+        "3 Way Catheter No",
+
+        "Encore Gloves No 6.5",
+        "Encore Gloves No 7",
+        "Encore Gloves No 7.5",
+
+        "Serjun Gloves No 6",
+        "Serjun Gloves No 6.5",
+        "Serjun Gloves No 7",
+        "Serjun Gloves No 7.5",
+
+        "Disposable Gloves",
+        "Steri Drage",
+        "Bandage Rool \"4\"/\"6\"",
+        "POP \"4\"/\"6\"",
+        "Soft Rool \"4\"/\"6\"",
+        "Distal Water 10ml",
+        "Vaccum Suction Set",
+        "Electro Cautery Pencil",
+        "HIP U Drope",
+        "I.O Drope",
+        "Hydrogen Peroxide",
+        "Skin Stapler",
+        "Epidural Kit No 16/18",
+        "Gamge Rool 6'',4''",
+        "Cuticell",
+        "Knee O Drope",
+        "Trubond",
+        "Bonwax",
+        "Ointement Mupirocin",
+        "Heambolock",
+        "Collagen",
+        "Surgical Pad",
+        "C-Arm Cover",
+        "Cling Drape",
+        "HBSG Kit",
+        "IV NS 100ml",
+        "Ab Gel",
+        "G Dressing",
+        "Central Line Kit",
+        "Sterile Drapes",
+        "Dynaplast",
+        "Knee Drape",
+        "Shoulder Drape",
+        "White Mop"
+    ];
+
+
+    let rows = "";
+
+    otItems.forEach(function(item, index) {
+
+        rows += `
+            <tr>
+
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td class="fixed-item-name">
+                    ${item}
+                </td>
+
+                <td>
+                    <input
+                        type="number"
+                        class="fixed-qty"
+                        min="0"
+                        value="0"
+                        oninput="calculateFixedOTBill()">
+                </td>
+
+                <td>
+                    <input
+                        type="number"
+                        class="fixed-rate"
+                        min="0"
+                        value="0"
+                        oninput="calculateFixedOTBill()">
+                </td>
+
+                <td>
+                    <input
+                        type="number"
+                        class="fixed-amount"
+                        value="0"
+                        readonly>
+                </td>
+
+            </tr>
+        `;
+
+    });
+
 
     app.innerHTML = `
 
@@ -856,8 +1257,13 @@ function showBilling() {
             <div class="page-header">
 
                 <div>
-                    <h1>OT BILL / MEDICINE REPLACEMENT</h1>
-                    <p>K. Suvidha Hospital</p>
+                    <h1>
+                        OT BILL / MEDICINE REPLACEMENT
+                    </h1>
+
+                    <p>
+                        K. Suvidha Hospital
+                    </p>
                 </div>
 
                 <div class="patient-id">
@@ -878,6 +1284,7 @@ function showBilling() {
 
                     <label>
                         Patient Name
+
                         <input
                             id="otPatientName"
                             type="text"
@@ -887,6 +1294,7 @@ function showBilling() {
 
                     <label>
                         Doctor Name
+
                         <input
                             id="otDoctorName"
                             type="text"
@@ -895,7 +1303,8 @@ function showBilling() {
 
 
                     <label>
-                        Bill Date
+                        Date
+
                         <input
                             id="otBillDate"
                             type="date">
@@ -904,6 +1313,7 @@ function showBilling() {
 
                     <label>
                         OT / Procedure
+
                         <input
                             id="otProcedure"
                             type="text"
@@ -913,86 +1323,43 @@ function showBilling() {
                 </div>
 
 
-                <h3>OT ITEMS / MEDICINES</h3>
+                <h3>
+                    OT LIST / O.T. MEDICINE REPLACEMENT
+                </h3>
 
 
-                <div class="ot-bill-table">
+                <div
+                    class="ot-bill-table"
+                    style="overflow-x:auto;">
 
                     <table>
 
                         <thead>
 
                             <tr>
+
                                 <th>Sl.</th>
+
                                 <th>Item / Medicine</th>
+
                                 <th>Qty</th>
+
                                 <th>Rate</th>
+
                                 <th>Amount</th>
+
                             </tr>
 
                         </thead>
 
 
-                        <tbody id="otBillItems">
+                        <tbody id="fixedOTBillItems">
 
-                            <tr>
-
-                                <td>1</td>
-
-                                <td>
-                                    <input
-                                        class="ot-item"
-                                        placeholder="Item / Medicine">
-                                </td>
-
-                                <td>
-                                    <input
-                                        class="ot-qty"
-                                        type="number"
-                                        min="0"
-                                        value="1"
-                                        oninput="calculateOTBill()">
-                                </td>
-
-                                <td>
-                                    <input
-                                        class="ot-rate"
-                                        type="number"
-                                        min="0"
-                                        value="0"
-                                        oninput="calculateOTBill()">
-                                </td>
-
-                                <td>
-                                    <input
-                                        class="ot-amount"
-                                        type="number"
-                                        value="0"
-                                        readonly>
-                                </td>
-
-                            </tr>
+                            ${rows}
 
                         </tbody>
 
                     </table>
-
-                </div>
-
-
-                <div class="ot-bill-buttons">
-
-                    <button
-                        class="save-button"
-                        onclick="addOTBillRow()">
-                        + Add Item
-                    </button>
-
-                    <button
-                        class="save-button"
-                        onclick="calculateOTBill()">
-                        Calculate
-                    </button>
 
                 </div>
 
@@ -1004,7 +1371,7 @@ function showBilling() {
                     </strong>
 
                     <input
-                        id="otBillTotal"
+                        id="fixedOTBillTotal"
                         type="number"
                         value="0"
                         readonly>
@@ -1015,40 +1382,52 @@ function showBilling() {
                 <div class="form">
 
                     <label>
+
                         Amount Paid
+
                         <input
-                            id="otAmountPaid"
+                            id="fixedOTAmountPaid"
                             type="number"
                             min="0"
                             value="0"
-                            oninput="calculateOTBalance()">
+                            oninput="calculateFixedOTBalance()">
+
                     </label>
 
 
                     <label>
+
                         Balance
+
                         <input
-                            id="otBalance"
+                            id="fixedOTBalance"
                             type="number"
                             value="0"
                             readonly>
+
                     </label>
 
 
                     <label>
+
                         Payment Mode
+
                         <input
-                            id="otPaymentMode"
+                            id="fixedOTPaymentMode"
                             type="text"
                             placeholder="Cash / UPI / Card">
+
                     </label>
 
 
                     <label class="full">
+
                         Billing Notes
+
                         <textarea
-                            id="otBillingNotes"
+                            id="fixedOTBillingNotes"
                             placeholder="Additional billing details"></textarea>
+
                     </label>
 
                 </div>
@@ -1058,7 +1437,14 @@ function showBilling() {
 
                     <button
                         class="save-button"
-                        onclick="saveOTBill()">
+                        onclick="calculateFixedOTBill()">
+                        Calculate
+                    </button>
+
+
+                    <button
+                        class="save-button"
+                        onclick="saveFixedOTBill()">
                         💾 Save OT Bill
                     </button>
 
@@ -1080,102 +1466,49 @@ function showBilling() {
 
 
 // ==========================================
-// ADD OT BILL ITEM
+// CALCULATE FIXED OT BILL
 // ==========================================
 
-function addOTBillRow() {
-
-    const table =
-        document.getElementById("otBillItems");
-
-    const rowNumber =
-        table.children.length + 1;
-
-    const row =
-        document.createElement("tr");
-
-    row.innerHTML = `
-
-        <td>${rowNumber}</td>
-
-        <td>
-            <input
-                class="ot-item"
-                placeholder="Item / Medicine">
-        </td>
-
-        <td>
-            <input
-                class="ot-qty"
-                type="number"
-                min="0"
-                value="1"
-                oninput="calculateOTBill()">
-        </td>
-
-        <td>
-            <input
-                class="ot-rate"
-                type="number"
-                min="0"
-                value="0"
-                oninput="calculateOTBill()">
-        </td>
-
-        <td>
-            <input
-                class="ot-amount"
-                type="number"
-                value="0"
-                readonly>
-        </td>
-
-    `;
-
-    table.appendChild(row);
-}
-
-
-// ==========================================
-// CALCULATE OT BILL
-// ==========================================
-
-function calculateOTBill() {
+function calculateFixedOTBill() {
 
     const rows =
         document.querySelectorAll(
-            "#otBillItems tr"
+            "#fixedOTBillItems tr"
         );
 
     let total = 0;
 
-    rows.forEach(row => {
+
+    rows.forEach(function(row) {
 
         const qty =
             Number(
-                row.querySelector(".ot-qty").value
+                row.querySelector(".fixed-qty").value
             ) || 0;
 
         const rate =
             Number(
-                row.querySelector(".ot-rate").value
+                row.querySelector(".fixed-rate").value
             ) || 0;
 
-        const amount =
-            qty * rate;
+        const amount = qty * rate;
 
-        row.querySelector(".ot-amount").value =
-            amount;
+        row.querySelector(
+            ".fixed-amount"
+        ).value = amount;
 
         total += amount;
 
     });
 
+
     document.getElementById(
-        "otBillTotal"
+        "fixedOTBillTotal"
     ).value = total;
 
-    calculateOTBalance();
+
+    calculateFixedOTBalance();
+
 }
 
 
@@ -1183,67 +1516,93 @@ function calculateOTBill() {
 // CALCULATE BALANCE
 // ==========================================
 
-function calculateOTBalance() {
+function calculateFixedOTBalance() {
 
     const total =
         Number(
             document.getElementById(
-                "otBillTotal"
+                "fixedOTBillTotal"
             ).value
         ) || 0;
+
 
     const paid =
         Number(
             document.getElementById(
-                "otAmountPaid"
+                "fixedOTAmountPaid"
             ).value
         ) || 0;
 
+
     document.getElementById(
-        "otBalance"
+        "fixedOTBalance"
     ).value =
         Math.max(total - paid, 0);
+
 }
 
 
 // ==========================================
-// SAVE OT BILL
+// SAVE FIXED OT BILL
 // ==========================================
 
-function saveOTBill() {
+function saveFixedOTBill() {
+
+    calculateFixedOTBill();
+
 
     const rows =
         document.querySelectorAll(
-            "#otBillItems tr"
+            "#fixedOTBillItems tr"
         );
 
     const items = [];
 
-    rows.forEach(row => {
 
-        items.push({
+    rows.forEach(function(row) {
 
-            item:
-                row.querySelector(
-                    ".ot-item"
-                ).value,
+        const item =
+            row.querySelector(
+                ".fixed-item-name"
+            ).textContent.trim();
 
-            quantity:
-                row.querySelector(
-                    ".ot-qty"
-                ).value,
 
-            rate:
-                row.querySelector(
-                    ".ot-rate"
-                ).value,
+        const qty =
+            row.querySelector(
+                ".fixed-qty"
+            ).value;
 
-            amount:
-                row.querySelector(
-                    ".ot-amount"
-                ).value
 
-        });
+        const rate =
+            row.querySelector(
+                ".fixed-rate"
+            ).value;
+
+
+        const amount =
+            row.querySelector(
+                ".fixed-amount"
+            ).value;
+
+
+        if (
+            Number(qty) > 0 ||
+            Number(rate) > 0
+        ) {
+
+            items.push({
+
+                item: item,
+
+                quantity: qty,
+
+                rate: rate,
+
+                amount: amount
+
+            });
+
+        }
 
     });
 
@@ -1274,40 +1633,43 @@ function saveOTBill() {
 
         total:
             document.getElementById(
-                "otBillTotal"
+                "fixedOTBillTotal"
             ).value,
 
         amountPaid:
             document.getElementById(
-                "otAmountPaid"
+                "fixedOTAmountPaid"
             ).value,
 
         balance:
             document.getElementById(
-                "otBalance"
+                "fixedOTBalance"
             ).value,
 
         paymentMode:
             document.getElementById(
-                "otPaymentMode"
+                "fixedOTPaymentMode"
             ).value,
 
         notes:
             document.getElementById(
-                "otBillingNotes"
+                "fixedOTBillingNotes"
             ).value
 
     };
 
 
     localStorage.setItem(
-        "ksuvidhaOTBill",
+        "ksuvidhaFixedOTBill",
         JSON.stringify(bill)
     );
 
 
     alert(
         "OT Bill saved successfully."
+    );
+
+}
     );
 }
 
