@@ -118,7 +118,37 @@ function showHome() {
         Register Patient
 
     </button>
+ <button
+        class="suvidha-home-button"
+        onclick="showPage('suvidha')">
 
+        🤖 SUVIDHA AI
+
+        <small>
+            Hospital Assistant
+        </small>
+
+    </button>
+
+
+    <button
+        class="secondary-button"
+        onclick="showPage('registration')">
+
+        Register Patient
+
+    </button>
+
+
+    <button
+        class="secondary-button"
+        onclick="showPage('consultation')">
+
+        Start Consultation
+
+    </button>
+
+</div>
     <button
         class="secondary-button"
         onclick="showPage('consultation')">
