@@ -35,7 +35,9 @@ function showPage(page) {
 else if (page === "patient-record") {
     showPatientRecord(1);
 }
-
+else if (page === "suvidha") {
+    showSuvidha();
+}
 else if (page === "registration") {
     showRegistration();
 }  
