@@ -3363,108 +3363,348 @@ function getBedStatusForAI() {
 
 function showSuvidha() {
 
-    getApp();
-
     app.innerHTML = `
+        <div class="suvidha-chat-page">
 
-        <div class="suvidha-page">
+            <div class="suvidha-chat-header">
 
-            <div class="suvidha-card">
+                <div class="suvidha-chat-title">
 
-                <h1>
-                    🤖 SUVIDHA AI
-                </h1>
+                    <div class="suvidha-ai-icon">
+                        🤖
+                    </div>
 
-                <p>
-                    K. Suvidha Hospital Reception Assistant
-                </p>
+                    <div>
+                        <h2>SUVIDHA AI</h2>
+                        <span>K. Suvidha Hospital Assistant</span>
+                    </div>
 
-                <div class="suvidha-status">
-
-                    <strong>
-                        SUVIDHA STATUS
-                    </strong>
-
-                    <p>
-                        Hospital Assistant Active
-                    </p>
-
-                    <p>
-                        25-Bed Hospital Knowledge Loaded
-                    </p>
-
-                    <p>
-                        O.T Slot Knowledge Loaded
-                    </p>
-
-                </div>
-
-                <div class="suvidha-buttons">
-
-                    <button
-                        onclick="suvidhaQuick('beds')"
-                    >
-                        🛏 Bed Status
-                    </button>
-
-                    <button
-                        onclick="suvidhaQuick('ot')"
-                    >
-                        🏥 O.T Slots
-                    </button>
-
-                    <button
-                        onclick="suvidhaQuick('patient')"
-                    >
-                        📁 Patient Record
-                    </button>
-
-                    <button
-                        onclick="suvidhaQuick('reception')"
-                    >
-                        👩‍💼 Receptionist Help
-                    </button>
-
-                    <button
-                        onclick="suvidhaQuick('hospital')"
-                    >
-                        🏥 Hospital Information
-                    </button>
-
-                </div>
-
-                <textarea
-                    id="suvidhaQuestion"
-                    placeholder="Ask SUVIDHA about beds, patients, O.T slots, billing or hospital information..."
-                ></textarea>
-
-                <button
-                    class="primary-button"
-                    onclick="suvidhaAsk()"
-                >
-                    🤖 Ask SUVIDHA
-                </button>
-
-                <div
-                    id="suvidhaAnswer"
-                    class="suvidha-answer"
-                >
-                    Hello. I am SUVIDHA AI.
-                    How can I help the receptionist?
                 </div>
 
                 <button
-                    onclick="showPage('home')"
-                >
+                    class="suvidha-back-button"
+                    onclick="showPage('home')">
                     🏠 Home
                 </button>
 
             </div>
 
+
+            <div class="suvidha-chat-container">
+
+                <div
+                    id="suvidhaMessages"
+                    class="suvidha-messages">
+
+                    <div class="suvidha-message ai">
+
+                        <div class="suvidha-message-bubble">
+
+                            👋 <strong>Hello!</strong><br><br>
+
+                            I am <strong>SUVIDHA AI</strong>, the
+                            hospital reception assistant.
+
+                            <br><br>
+
+                            You can ask me about:
+
+                            <br>
+                            🛏️ Beds<br>
+                            🏥 Patients<br>
+                            🩺 Doctors<br>
+                            💳 Billing<br>
+                            🏨 Hospital information<br>
+                            🏗️ O.T. slots
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="suvidha-chat-input-area">
+
+                    <div class="suvidha-quick-actions">
+
+                        <button onclick="suvidhaQuick('Show bed status')">
+                            🛏️ Beds
+                        </button>
+
+                        <button onclick="suvidhaQuick('Show O.T. slots')">
+                            🏗️ O.T.
+                        </button>
+
+                        <button onclick="suvidhaQuick('Show patient records')">
+                            📁 Patients
+                        </button>
+
+                        <button onclick="suvidhaQuick('Help with billing')">
+                            💳 Billing
+                        </button>
+
+                    </div>
+
+
+                    <div class="suvidha-chat-input-row">
+
+                        <textarea
+                            id="suvidhaInput"
+                            class="suvidha-chat-input"
+                            placeholder="Message SUVIDHA AI..."
+                            onkeydown="suvidhaEnter(event)">
+                        </textarea>
+
+                        <button
+                            class="suvidha-mic-button"
+                            onclick="startSuvidhaVoice()"
+                            title="Voice input">
+                            🎤
+                        </button>
+
+                        <button
+                            class="suvidha-send-button"
+                            onclick="sendSuvidhaMessage()"
+                            title="Send">
+                            ➤
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
+    `;
+}function suvidhaEnter(event) {
+
+    if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        sendSuvidhaMessage();
+    }
+}
+
+
+function sendSuvidhaMessage() {
+
+    const input = document.getElementById("suvidhaInput");
+
+    if (!input) return;
+
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    addSuvidhaMessage(message, "user");
+
+    input.value = "";
+
+    setTimeout(function () {
+
+        const reply = getSuvidhaReply(message);
+
+        addSuvidhaMessage(reply, "ai");
+
+    }, 300);
+}
+
+
+function addSuvidhaMessage(message, type) {
+
+    const messages = document.getElementById("suvidhaMessages");
+
+    if (!messages) return;
+
+    const div = document.createElement("div");
+
+    div.className = "suvidha-message " + type;
+
+    div.innerHTML = `
+        <div class="suvidha-message-bubble">
+            ${escapeSuvidha(message)}
+        </div>
+    `;
+
+    messages.appendChild(div);
+
+    messages.scrollTop = messages.scrollHeight;
+}
+
+
+function suvidhaQuick(message) {
+
+    const input = document.getElementById("suvidhaInput");
+
+    if (!input) return;
+
+    input.value = message;
+
+    sendSuvidhaMessage();
+}
+
+
+function escapeSuvidha(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+function getSuvidhaReply(message) {
+
+    const text = message.toLowerCase();
+
+
+    if (
+        text.includes("bed") ||
+        text.includes("beds")
+    ) {
+
+        return `
+            🛏️ <strong>Bed Management</strong><br><br>
+            K. Suvidha Hospital has <strong>25 beds</strong>.<br><br>
+            You can use the Bed Management section to
+            mark beds as <strong>Occupied</strong> or
+            <strong>Available</strong> and enter patient details.
+        `;
+    }
+
+
+    if (
+        text.includes("o.t") ||
+        text.includes("ot") ||
+        text.includes("operation")
+    ) {
+
+        return `
+            🏗️ <strong>O.T. Information</strong><br><br>
+            The hospital has an O.T. Slot section where
+            operation theatre slots can be entered and managed.
+        `;
+    }
+
+
+    if (
+        text.includes("patient") ||
+        text.includes("record")
+    ) {
+
+        return `
+            📁 <strong>Patient Records</strong><br><br>
+            Patient Records contains the patient's complete
+            hospital information, including registration,
+            consultation, investigations, treatment,
+            billing, follow-up and discharge summary.
+        `;
+    }
+
+
+    if (
+        text.includes("bill") ||
+        text.includes("billing")
+    ) {
+
+        return `
+            💳 <strong>Billing</strong><br><br>
+            Billing can contain patient details, doctor,
+            hospital charges, quantity, rate, amount,
+            discount, payment and balance.
+        `;
+    }
+
+
+    if (
+        text.includes("doctor") ||
+        text.includes("doctors")
+    ) {
+
+        return `
+            🩺 <strong>Doctors</strong><br><br>
+            SUVIDHA can work with the hospital's doctor
+            list and doctor selection used throughout
+            the patient record system.
+        `;
+    }
+
+
+    if (
+        text.includes("hello") ||
+        text.includes("hi") ||
+        text.includes("hey")
+    ) {
+
+        return `
+            👋 Hello! I am <strong>SUVIDHA AI</strong>.<br><br>
+            How can I help you with the hospital?
+        `;
+    }
+
+
+    return `
+        🤖 I am SUVIDHA AI, the K. Suvidha Hospital
+        reception assistant.<br><br>
+
+        You can ask me about <strong>beds, patients,
+        doctors, billing, O.T. slots</strong> or
+        hospital information.
     `;
 }
 
+
+function startSuvidhaVoice() {
+
+    if (!("webkitSpeechRecognition" in window) &&
+        !("SpeechRecognition" in window)) {
+
+        alert("Voice input is not supported in this browser.");
+
+        return;
+    }
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+    recognition.start();
+
+
+    recognition.onresult = function(event) {
+
+        const text =
+            event.results[0][0].transcript;
+
+        const input =
+            document.getElementById("suvidhaInput");
+
+        if (input) {
+
+            input.value += text;
+
+            input.focus();
+        }
+    };
+
+
+    recognition.onerror = function() {
+
+        console.log("Voice input stopped.");
+    };
+}
 /* ============================================================
    SUVIDHA AI QUESTION
    ============================================================ */
