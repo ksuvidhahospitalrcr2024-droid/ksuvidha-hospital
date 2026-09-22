@@ -3559,151 +3559,588 @@ function escapeSuvidha(text) {
 
 function getSuvidhaReply(message) {
 
-    const text = message.toLowerCase();
+    const text = message.trim();
+    const lower = text.toLowerCase();
 
+    /* ==========================================
+       REMEMBER USER NAME
+       ========================================== */
 
-    if (
-        text.includes("bed") ||
-        text.includes("beds")
-    ) {
+    const nameMatch = text.match(
+        /(?:my name is|i am|i'm|call me)\s+([a-zA-Z][a-zA-Z .'-]{1,40})/i
+    );
+
+    if (nameMatch) {
+
+        const name = nameMatch[1]
+            .trim()
+            .replace(/\s+/g, " ");
+
+        localStorage.setItem(
+            "suvidhaUserName",
+            name
+        );
 
         return `
-            🛏️ <strong>Bed Management</strong><br><br>
-            K. Suvidha Hospital has <strong>25 beds</strong>.<br><br>
-            You can use the Bed Management section to
-            mark beds as <strong>Occupied</strong> or
-            <strong>Available</strong> and enter patient details.
+            👋 Hello <strong>${escapeSuvidha(name)}</strong>!
+
+            <br><br>
+
+            I will remember your name on this device.
+
+            <br><br>
+
+            <strong>What help can I do for you?</strong>
+
+            <br><br>
+
+            🏥 Hospital Information<br>
+            🛏️ Bed Management<br>
+            🩺 Doctor Information<br>
+            📁 Patient Records<br>
+            💳 Billing<br>
+            🏗️ O.T. Slots<br>
+            📄 Discharge Summary
         `;
     }
 
 
+    /* ==========================================
+       GET SAVED NAME
+       ========================================== */
+
+    const savedName =
+        localStorage.getItem("suvidhaUserName");
+
+    const helloName = savedName
+        ? escapeSuvidha(savedName)
+        : "there";
+
+
+    /* ==========================================
+       GREETING
+       ========================================== */
+
     if (
-        text.includes("o.t") ||
-        text.includes("ot") ||
-        text.includes("operation")
+        lower === "hi" ||
+        lower === "hello" ||
+        lower === "hey" ||
+        lower.includes("good morning") ||
+        lower.includes("good afternoon") ||
+        lower.includes("good evening")
     ) {
 
         return `
-            🏗️ <strong>O.T. Information</strong><br><br>
-            The hospital has an O.T. Slot section where
-            operation theatre slots can be entered and managed.
+            👋 Hello <strong>${helloName}</strong>!
+
+            <br><br>
+
+            I am <strong>SUVIDHA AI</strong>,
+            your K. Suvidha Hospital assistant.
+
+            <br><br>
+
+            <strong>What help can I do for you?</strong>
+
+            <br><br>
+
+            You can ask me a question or choose a topic:
+            <br><br>
+
+            🩺 How to add doctor information?<br>
+            🛏️ How to update bed status?<br>
+            📁 How to create a patient record?<br>
+            💳 How to make a bill?<br>
+            🏗️ How to book an O.T. slot?<br>
+            📄 How to prepare a discharge summary?
         `;
     }
 
 
+    /* ==========================================
+       ADD DOCTOR
+       ========================================== */
+
     if (
-        text.includes("patient") ||
-        text.includes("record")
+        lower.includes("add doctor") ||
+        lower.includes("add a doctor") ||
+        lower.includes("doctor information") ||
+        lower.includes("how to add doctor")
     ) {
 
         return `
-            📁 <strong>Patient Records</strong><br><br>
-            Patient Records contains the patient's complete
-            hospital information, including registration,
-            consultation, investigations, treatment,
-            billing, follow-up and discharge summary.
+            🩺 <strong>How to Add Doctor Information</strong>
+
+            <br><br>
+
+            Follow these steps:
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open the <strong>Doctor Information</strong>
+            section.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Click <strong>Add Doctor</strong>.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Enter the doctor's full name.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            Enter the doctor's qualification or specialty.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Enter registration or other required
+            professional information.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Click <strong>Save Doctor</strong>.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            The saved doctor should become available
+            in the doctor selection lists used by
+            the hospital system.
+
+            <br><br>
+
+            💡 If you want, ask me:
+            <strong>"How do I select a doctor in consultation?"</strong>
         `;
     }
 
 
+    /* ==========================================
+       BED MANAGEMENT
+       ========================================== */
+
     if (
-        text.includes("bill") ||
-        text.includes("billing")
+        lower.includes("bed") ||
+        lower.includes("beds") ||
+        lower.includes("bed status") ||
+        lower.includes("occupied")
     ) {
 
         return `
-            💳 <strong>Billing</strong><br><br>
-            Billing can contain patient details, doctor,
-            hospital charges, quantity, rate, amount,
-            discount, payment and balance.
+            🛏️ <strong>How to Update Bed Status</strong>
+
+            <br><br>
+
+            The hospital has <strong>25 beds</strong>.
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open <strong>Bed Management</strong>.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Select the required bed.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Select <strong>Occupied</strong> or
+            <strong>Available</strong>.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            If occupied, enter the patient's name.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Enter the UHID.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Enter the patient's location,
+            such as Ward, Daycare, ICU, Casualty
+            or Special Room.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            Save the bed information.
+
+            <br><br>
+
+            The bed status can then be displayed
+            as <strong>Occupied</strong> or
+            <strong>Available</strong>.
         `;
     }
 
 
+    /* ==========================================
+       PATIENT RECORD
+       ========================================== */
+
     if (
-        text.includes("doctor") ||
-        text.includes("doctors")
+        lower.includes("patient record") ||
+        lower.includes("patients record") ||
+        lower.includes("patient registration") ||
+        lower.includes("create patient")
     ) {
 
         return `
-            🩺 <strong>Doctors</strong><br><br>
-            SUVIDHA can work with the hospital's doctor
-            list and doctor selection used throughout
-            the patient record system.
+            📁 <strong>How to Create a Patient Record</strong>
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open <strong>Patients Record</strong>.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Open the <strong>Registration</strong> page.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Enter the patient's name and basic details.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            Enter the UHID.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Complete the registration information.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Continue through Consultation,
+            Investigations, Prescription,
+            Admission & Treatment, Billing,
+            Follow-up and Discharge Summary.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            Save the patient record.
+
+            <br><br>
+
+            The goal is to keep the patient's complete
+            hospital information connected to the same
+            patient record.
         `;
     }
 
 
+    /* ==========================================
+       BILLING
+       ========================================== */
+
     if (
-        text.includes("hello") ||
-        text.includes("hi") ||
-        text.includes("hey")
+        lower.includes("billing") ||
+        lower.includes("bill") ||
+        lower.includes("make a bill")
     ) {
 
         return `
-            👋 Hello! I am <strong>SUVIDHA AI</strong>.<br><br>
-            How can I help you with the hospital?
+            💳 <strong>How to Make a Patient Bill</strong>
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open <strong>Billing</strong>.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Select or enter the patient.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Confirm the patient's UHID and name.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            Select the required billing items.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Enter the quantity.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Enter or update the rate.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            The amount should calculate as:
+
+            <br><br>
+
+            <strong>Amount = Quantity × Rate</strong>
+
+            <br><br>
+
+            <strong>Step 8:</strong><br>
+            Enter discount if applicable.
+
+            <br><br>
+
+            <strong>Step 9:</strong><br>
+            Enter amount paid.
+
+            <br><br>
+
+            <strong>Step 10:</strong><br>
+            Select the payment mode.
+
+            <br><br>
+
+            <strong>Step 11:</strong><br>
+            Check the balance.
+
+            <br><br>
+
+            <strong>Step 12:</strong><br>
+            Save and print the bill.
         `;
     }
 
+
+    /* ==========================================
+       O.T. SLOT
+       ========================================== */
+
+    if (
+        lower.includes("o.t") ||
+        lower.includes("ot slot") ||
+        lower.includes("operation theatre") ||
+        lower.includes("operation theater") ||
+        lower.includes("book ot")
+    ) {
+
+        return `
+            🏗️ <strong>How to Book an O.T. Slot</strong>
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open <strong>O.T. Slots</strong>.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Select the operation date.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Select the starting time.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            Enter the expected duration.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Enter the patient name and UHID.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Select the doctor.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            Enter the procedure or operation.
+
+            <br><br>
+
+            <strong>Step 8:</strong><br>
+            Save the O.T. slot.
+
+            <br><br>
+
+            SUVIDHA can then use the stored O.T.
+            information when answering questions
+            about the theatre schedule.
+        `;
+    }
+
+
+    /* ==========================================
+       DISCHARGE SUMMARY
+       ========================================== */
+
+    if (
+        lower.includes("discharge") ||
+        lower.includes("discharge summary")
+    ) {
+
+        return `
+            📄 <strong>How to Prepare a Discharge Summary</strong>
+
+            <br><br>
+
+            <strong>Step 1:</strong><br>
+            Open the patient's record.
+
+            <br><br>
+
+            <strong>Step 2:</strong><br>
+            Open <strong>Discharge Summary</strong>.
+
+            <br><br>
+
+            <strong>Step 3:</strong><br>
+            Confirm patient name and UHID.
+
+            <br><br>
+
+            <strong>Step 4:</strong><br>
+            Enter admission and discharge details.
+
+            <br><br>
+
+            <strong>Step 5:</strong><br>
+            Enter the final diagnosis.
+
+            <br><br>
+
+            <strong>Step 6:</strong><br>
+            Enter investigations and procedures.
+
+            <br><br>
+
+            <strong>Step 7:</strong><br>
+            Enter the hospital course.
+
+            <br><br>
+
+            <strong>Step 8:</strong><br>
+            Enter medicines and advice.
+
+            <br><br>
+
+            <strong>Step 9:</strong><br>
+            Enter follow-up instructions.
+
+            <br><br>
+
+            <strong>Step 10:</strong><br>
+            Save and print the discharge summary.
+        `;
+    }
+
+
+    /* ==========================================
+       HELP
+       ========================================== */
+
+    if (
+        lower.includes("help") ||
+        lower.includes("what can you do") ||
+        lower.includes("what can i ask")
+    ) {
+
+        return `
+            🤖 <strong>SUVIDHA AI Help</strong>
+
+            <br><br>
+
+            Hello <strong>${helloName}</strong>!
+
+            <br><br>
+
+            I can guide you step by step with:
+
+            <br><br>
+
+            🩺 Doctor Information<br>
+            🛏️ Bed Management<br>
+            📁 Patient Records<br>
+            🧑‍⚕️ Registration<br>
+            🩺 Consultation<br>
+            🧪 Investigations<br>
+            💊 Prescription / Pharmacy<br>
+            🏥 Admission & Treatment<br>
+            💳 Billing<br>
+            📅 Follow-up<br>
+            📄 Discharge Summary<br>
+            🏗️ O.T. Slots
+
+            <br><br>
+
+            Ask me something like:
+
+            <br><br>
+
+            <strong>"How do I add doctor information?"</strong>
+        `;
+    }
+
+
+    /* ==========================================
+       DEFAULT RESPONSE
+       ========================================== */
 
     return `
-        🤖 I am SUVIDHA AI, the K. Suvidha Hospital
-        reception assistant.<br><br>
+        🤖 <strong>SUVIDHA AI</strong>
 
-        You can ask me about <strong>beds, patients,
-        doctors, billing, O.T. slots</strong> or
-        hospital information.
+        <br><br>
+
+        Hello <strong>${helloName}</strong>!
+
+        <br><br>
+
+        I can explain hospital software tasks
+        <strong>step by step</strong>.
+
+        <br><br>
+
+        Try asking:
+
+        <br><br>
+
+        🩺 "How do I add doctor information?"<br>
+        🛏️ "How do I update a bed?"<br>
+        📁 "How do I create a patient record?"<br>
+        💳 "How do I make a bill?"<br>
+        🏗️ "How do I book an O.T. slot?"<br>
+        📄 "How do I prepare a discharge summary?"
+
+        <br><br>
+
+        Or simply tell me your name, for example:
+
+        <br><br>
+
+        <strong>"My name is Rahul"</strong>
     `;
-}
-
-
-function startSuvidhaVoice() {
-
-    if (!("webkitSpeechRecognition" in window) &&
-        !("SpeechRecognition" in window)) {
-
-        alert("Voice input is not supported in this browser.");
-
-        return;
-    }
-
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-    const recognition = new SpeechRecognition();
-
-    recognition.lang = "en-IN";
-
-    recognition.continuous = false;
-
-    recognition.interimResults = false;
-
-    recognition.start();
-
-
-    recognition.onresult = function(event) {
-
-        const text =
-            event.results[0][0].transcript;
-
-        const input =
-            document.getElementById("suvidhaInput");
-
-        if (input) {
-
-            input.value += text;
-
-            input.focus();
-        }
-    };
-
-
-    recognition.onerror = function() {
-
-        console.log("Voice input stopped.");
-    };
 }
 /* ============================================================
    SUVIDHA AI QUESTION
