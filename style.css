@@ -2132,3 +2132,119 @@ button:hover,
         border: none;
     }
 }
+/* =====================================================
+   K SUVIDHA HOSPITAL - BEAUTIFUL SIDE MENU
+   ===================================================== */
+
+.menu-button {
+    width: 46px !important;
+    height: 46px !important;
+    border: none !important;
+    background: transparent !important;
+    color: #176b87 !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+.menu-button:hover {
+    background: #eef7fa !important;
+}
+
+/* Side menu */
+.side-menu {
+    position: fixed !important;
+    top: 0 !important;
+    right: -360px !important;
+    width: 340px !important;
+    max-width: 90vw !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+    z-index: 99999 !important;
+    overflow-y: auto !important;
+    padding: 25px 20px 30px !important;
+    box-shadow: -8px 0 30px rgba(15, 23, 42, 0.18) !important;
+    transition: right 0.3s ease !important;
+    border-left: 1px solid #e1e8ee !important;
+}
+
+/* When JavaScript adds "open" */
+.side-menu.open {
+    right: 0 !important;
+}
+
+/* Menu heading */
+.side-menu h3 {
+    margin: 15px 5px 20px !important;
+    padding-bottom: 15px !important;
+    border-bottom: 2px solid #eef3f6 !important;
+    color: #123b55 !important;
+    font-size: 20px !important;
+}
+
+/* Close button */
+.side-menu .close-button {
+    width: 38px !important;
+    height: 38px !important;
+    float: right !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: #f3f7f9 !important;
+    color: #456070 !important;
+    font-size: 22px !important;
+    cursor: pointer !important;
+}
+
+.side-menu .close-button:hover {
+    background: #e8f1f4 !important;
+}
+
+/* Every menu button */
+.side-menu > button:not(.close-button) {
+    width: 100% !important;
+    display: block !important;
+    text-align: left !important;
+    padding: 14px 16px !important;
+    margin: 7px 0 !important;
+    border: 1px solid #e2eaf0 !important;
+    border-radius: 11px !important;
+    background: #ffffff !important;
+    color: #23415a !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: 0.2s ease !important;
+}
+
+.side-menu > button:not(.close-button):hover {
+    background: #eef7fa !important;
+    border-color: #b9d5df !important;
+    transform: translateX(-2px) !important;
+}
+
+/* AI menu button */
+.side-menu button[onclick*="suvidha"] {
+    background: #176b87 !important;
+    color: #ffffff !important;
+    border-color: #176b87 !important;
+}
+
+/* Menu on mobile */
+@media (max-width: 600px) {
+
+    .side-menu {
+        width: 310px !important;
+        max-width: 88vw !important;
+    }
+
+    .menu-button {
+        width: 42px !important;
+        height: 42px !important;
+        font-size: 27px !important;
+    }
+}
