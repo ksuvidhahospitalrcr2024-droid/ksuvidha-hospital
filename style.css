@@ -2248,3 +2248,196 @@ button:hover,
         font-size: 27px !important;
     }
 }
+/* =====================================================
+   K SUVIDHA HOSPITAL - PAPER STYLE FORMS
+   REMOVE UGLY BOXES
+   ===================================================== */
+
+/* Main form becomes spacious */
+.form {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px 35px !important;
+    padding: 30px !important;
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Every field */
+.form label {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    color: #385267 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+/* Text fields - clean underline style */
+.form input,
+.form select {
+    width: 100% !important;
+    height: 42px !important;
+    padding: 7px 4px !important;
+    border: none !important;
+    border-bottom: 2px solid #b8cbd5 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #172033 !important;
+    font-size: 15px !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Focus */
+.form input:focus,
+.form select:focus {
+    border-bottom: 2px solid #176b87 !important;
+    box-shadow: none !important;
+    background: #fafdfe !important;
+}
+
+/* Large writing areas */
+.form textarea {
+    width: 100% !important;
+    min-height: 115px !important;
+    padding: 12px 5px !important;
+    border: 1px solid #d7e2e8 !important;
+    border-radius: 8px !important;
+    background: #fcfeff !important;
+    color: #172033 !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    resize: vertical !important;
+    outline: none !important;
+}
+
+/* Focus on writing areas */
+.form textarea:focus {
+    border-color: #176b87 !important;
+    box-shadow: 0 0 0 3px rgba(23,107,135,0.08) !important;
+}
+
+/* Full width fields */
+.form .full {
+    grid-column: 1 / -1 !important;
+}
+
+/* =====================================================
+   PATIENT INFORMATION
+   ===================================================== */
+
+.patient-info,
+.patient-header,
+.patient-details {
+    background: #ffffff !important;
+    border-bottom: 1px solid #dce6eb !important;
+    padding: 20px 0 !important;
+}
+
+.patient-info input,
+.patient-header input,
+.patient-details input,
+.patient-info select,
+.patient-header select,
+.patient-details select {
+    border: none !important;
+    border-bottom: 1px solid #aebfc8 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 6px 3px !important;
+}
+
+/* =====================================================
+   CONSULTATION TITLE
+   ===================================================== */
+
+.form-title,
+.document-title,
+.page-title {
+    color: #123b55 !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    padding-bottom: 12px !important;
+    margin-bottom: 25px !important;
+    border-bottom: 2px solid #176b87 !important;
+}
+
+/* =====================================================
+   DOCTOR SELECTOR
+   ===================================================== */
+
+.form select {
+    cursor: pointer !important;
+}
+
+/* =====================================================
+   BUTTONS - NO BOXY LOOK
+   ===================================================== */
+
+.form button {
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 12px 20px !important;
+    background: #176b87 !important;
+    color: white !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+/* =====================================================
+   PATIENT RECORD PAPER
+   ===================================================== */
+
+.patient-paper {
+    background: #ffffff !important;
+    max-width: 1000px !important;
+    margin: 25px auto !important;
+    padding: 38px !important;
+    border: 1px solid #dce5ea !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 30px rgba(15,23,42,0.07) !important;
+}
+
+/* Patient record inputs */
+.patient-paper input,
+.patient-paper select {
+    border: none !important;
+    border-bottom: 1.5px solid #b8cbd5 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Patient record text areas */
+.patient-paper textarea {
+    border: 1px solid #d7e2e8 !important;
+    border-radius: 7px !important;
+    background: #fcfeff !important;
+    min-height: 110px !important;
+    line-height: 1.6 !important;
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .form {
+        grid-template-columns: 1fr !important;
+        gap: 22px !important;
+        padding: 20px !important;
+    }
+
+    .form .full {
+        grid-column: auto !important;
+    }
+
+    .patient-paper {
+        margin: 10px !important;
+        padding: 20px !important;
+    }
+}
