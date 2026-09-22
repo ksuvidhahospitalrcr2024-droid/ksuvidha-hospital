@@ -1141,3 +1141,134 @@ body {
     object-fit: contain !important;
     display: block !important;
 }
+/* ================================
+   K SUVIDHA HOSPITAL - CLEAN HOME
+   ================================ */
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f8fb;
+    color: #1f2937;
+}
+
+/* Clean main home area */
+.home-container,
+.home-page,
+.hero-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 35px 25px;
+}
+
+/* Hospital header */
+.hospital-header {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+
+/* Remove ugly square appearance */
+.hero-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.hero-buttons button {
+    border: none;
+    border-radius: 12px;
+    padding: 15px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.hero-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+}
+
+/* Patient Records */
+.hero-buttons .primary-button {
+    background: #2563eb;
+    color: white;
+}
+
+/* Other buttons */
+.hero-buttons .secondary-button {
+    background: white;
+    color: #1f2937;
+    border: 1px solid #dbe3ea;
+}
+
+/* SUVIDHA AI button */
+.suvidha-home-button {
+    width: 100%;
+    max-width: 420px;
+    margin: 25px auto;
+    display: block;
+    padding: 20px 25px;
+    border: none;
+    border-radius: 16px;
+    background: white;
+    color: #1f2937;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.10);
+}
+
+.suvidha-home-button small {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: normal;
+    color: #64748b;
+}
+
+.suvidha-home-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Bed Management button */
+.bed-management-button {
+    width: 100%;
+    max-width: 420px;
+    margin: 15px auto;
+    display: block;
+    padding: 18px;
+    border: 1px solid #dbe3ea;
+    border-radius: 16px;
+    background: white;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+}
+
+.bed-management-button:hover {
+    transform: translateY(-2px);
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+    .home-container,
+    .home-page,
+    .hero-section {
+        padding: 20px 15px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .hero-buttons button {
+        width: 100%;
+    }
+}
