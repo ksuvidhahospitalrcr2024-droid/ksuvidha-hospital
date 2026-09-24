@@ -3047,6 +3047,35 @@ function showOTSlot() {
 
         </div>
     `;
+<div class="ot-type-bottom">
+
+    <h3>O.T. TYPE</h3>
+
+    <div class="ot-type-options">
+
+        <button type="button"
+                class="ot-type-button"
+                onclick="selectOTType('MODULAR O.T.')">
+            MODULAR O.T.
+        </button>
+
+        <button type="button"
+                class="ot-type-button"
+                onclick="selectOTType('GENERAL SURGERY O.T.')">
+            GENERAL SURGERY O.T.
+        </button>
+
+    </div>
+
+    <input type="hidden"
+           id="selectedOTType"
+           value="">
+
+    <div id="selectedOTDisplay" class="selected-ot-display">
+        Please select O.T. type
+    </div>
+
+</div>
 }
 
 /* ============================================================
