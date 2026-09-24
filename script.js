@@ -4375,8 +4375,15 @@ function suvidhaAsk() {
 
     }
 
-    answerBox.textContent =
-        answer;
+    answer = String(answer)
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<strong[^>]*>/gi, "")
+    .replace(/<\/strong>/gi, "")
+    .replace(/<b[^>]*>/gi, "")
+    .replace(/<\/b>/gi, "")
+    .replace(/<[^>]*>/g, "");
+
+answerBox.textContent = answer;
 }
 
 /* ============================================================
