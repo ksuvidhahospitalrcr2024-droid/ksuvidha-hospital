@@ -3046,7 +3046,6 @@ function showOTSlot() {
             </div>
 
         </div>
-    `;
 <div class="ot-type-bottom">
 
     <h3>O.T. TYPE</h3>
