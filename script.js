@@ -4376,15 +4376,7 @@ function suvidhaAsk() {
     }
 
     answer = String(answer)
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<strong[^>]*>/gi, "")
-    .replace(/<\/strong>/gi, "")
-    .replace(/<b[^>]*>/gi, "")
-    .replace(/<\/b>/gi, "")
-    .replace(/<[^>]*>/g, "");
-
-answerBox.textContent = answer;
-}
+    .replace(...)
 
 /* ============================================================
    SUVIDHA QUICK QUESTIONS
