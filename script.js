@@ -4514,3 +4514,47 @@ if (
     initializeKSuvidha();
 
 }
+/* ===============================
+   K SUVIDHA HOSPITAL - SIDE MENU
+   =============================== */
+
+function openMenu() {
+    const menu = document.querySelector(".side-menu");
+
+    if (!menu) {
+        console.log("Side menu not found");
+        return;
+    }
+
+    menu.classList.toggle("open");
+}
+
+/* Close menu when clicking outside */
+document.addEventListener("click", function (event) {
+
+    const menu = document.querySelector(".side-menu");
+    const button = document.querySelector(".menu-button");
+
+    if (!menu || !button) return;
+
+    if (
+        menu.classList.contains("open") &&
+        !menu.contains(event.target) &&
+        !button.contains(event.target)
+    ) {
+        menu.classList.remove("open");
+    }
+});
+
+/* Close menu when selecting a menu item */
+document.addEventListener("click", function (event) {
+
+    if (event.target.closest(".side-menu button, .side-menu a")) {
+
+        const menu = document.querySelector(".side-menu");
+
+        if (menu) {
+            menu.classList.remove("open");
+        }
+    }
+});
