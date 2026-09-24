@@ -2544,3 +2544,62 @@ button:hover,
     background: #dff1f7 !important;
     transform: translateX(-3px);
 }
+/* =========================
+   BOOK O.T. - O.T. TYPE
+   ========================= */
+
+.ot-type-bottom {
+    margin-top: 35px;
+    padding-top: 25px;
+    border-top: 1px solid #dce8ed;
+    text-align: center;
+}
+
+.ot-type-bottom h3 {
+    margin-bottom: 18px;
+    color: #176b87;
+    font-size: 20px;
+}
+
+.ot-type-options {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.ot-type-button {
+    min-width: 220px;
+    padding: 16px 24px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: #eef8fb;
+    color: #176b87;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+
+    transition: 0.2s ease;
+}
+
+.ot-type-button:hover {
+    transform: translateY(-2px);
+}
+
+.ot-type-button.selected {
+    background: #176b87;
+    color: white;
+}
+
+.selected-ot-display {
+    margin-top: 18px;
+    color: #176b87;
+    font-weight: 600;
+    font-size: 15px;
+}
