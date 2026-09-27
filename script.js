@@ -3391,7 +3391,7 @@ function getBedStatusForAI() {
 
 function showSuvidha() {
 
-    app.innerHTML = `
+        app.innerHTML = `
         <div class="suvidha-chat-page">
 
             <div class="suvidha-chat-header">
