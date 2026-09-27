@@ -1,4616 +1,6075 @@
 /* ============================================================
    K. SUVIDHA HOSPITAL
-   COMPLETE CLEAN SCRIPT.JS
+   COMPLETE MASTER SCRIPT
+   ============================================================
+
+   Replace the ENTIRE script.js with this file.
+
+   Features:
+   - Patients Record
+   - Registration
+   - Consultation
+   - Investigations
+   - Prescription / Pharmacy
+   - Admission & Treatment
+   - Billing
+   - Follow-up
+   - Discharge Summary
+   - Beds
+   - O.T. SLOT
+   - Saved Files
+   - SUVIDHA AI
+   - Voice input
+   - Voice output
+   - Print
+   - UHID numbering
    ============================================================ */
 
-"use strict";
+(function () {
 
-/* ============================================================
-   BASIC HOSPITAL INFORMATION
-   ============================================================ */
+    "use strict";
 
-const HOSPITAL_NAME = "K. SUVIDHA HOSPITAL";
-const HOSPITAL_SUBTITLE = "Multi Speciality Hospital";
-const HOSPITAL_ADDRESS = "Raichur, Karnataka";
-const HOSPITAL_PHONE = "Hospital Contact";
-const HOSPITAL_LOGO = "image.png";
-
-/* ============================================================
-   HOSPITAL BED CAPACITY
-   TOTAL = 25
-   ============================================================ */
-
-const BED_CAPACITY = {
-    Ward: 4,
-    Daycare: 4,
-    ICU: 5,
-    Casualty: 4,
-    "Special Room": 8
-};
-
-const TOTAL_BEDS = 25;
-
-/* ============================================================
-   DOCTOR LIST
-   ============================================================ */
-
-const DOCTORS = [
-    "Dr. ANIRUDH KULKARNI",
-    "Dr. SHEKAR .M",
-    "Dr. RAMESH BABU",
-    "Dr. RAMESH .C",
-    "Dr. SHAHBAZ",
-    "Dr. VISHALAKSHI",
-    "Dr. SAI RAGHAVENDRA",
-    "Dr. PRASHANT",
-    "Dr. KARTHIK",
-    "Dr. VINAY BADRI",
-    "Dr. PAVAN",
-    "Dr. JYOTHI",
-    "Dr. RAMESH SAGAR",
-    "Dr. SAGAR",
-    "Dr. CN KULKARNI"
-];
-
-/* ============================================================
-   STORAGE KEYS
-   ============================================================ */
-
-const PATIENT_KEY = "ksuvidha_patient";
-const PATIENT_RECORD_KEY = "ksuvidha_patient_record";
-const BED_KEY = "ksuvidha_beds";
-const OT_KEY = "ksuvidha_ot_slots";
-const BILL_KEY = "ksuvidha_bills";
-const DOCTOR_KEY = "ksuvidha_doctors";
-
-/* ============================================================
-   APP ELEMENT
-   ============================================================ */
-
-let app = null;
-
-/* ============================================================
-   SAFE TEXT
-   ============================================================ */
-
-function safe(value) {
-    if (value === null || value === undefined) {
-        return "";
-    }
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-/* ============================================================
-   INITIALIZE APP
-   ============================================================ */
-
-function getApp() {
-    app = document.getElementById("app");
+    const app = document.getElementById("app");
 
     if (!app) {
-        console.error(
-            "K. Suvidha Hospital: <div id='app'></div> was not found."
-        );
-    }
-
-    return app;
-}
-
-/* ============================================================
-   DOCTOR DATABASE
-   ============================================================ */
-
-function getDoctors() {
-
-    let savedDoctors = [];
-
-    try {
-        savedDoctors =
-            JSON.parse(
-                localStorage.getItem(DOCTOR_KEY) || "[]"
-            );
-    } catch (error) {
-        savedDoctors = [];
-    }
-
-    const allDoctors = [
-        ...DOCTORS,
-        ...savedDoctors
-    ];
-
-    return [...new Set(allDoctors)];
-}
-
-function doctorOptions(selected = "") {
-
-    return getDoctors()
-        .map(function (doctor) {
-
-            return `
-                <option
-                    value="${safe(doctor)}"
-                    ${doctor === selected ? "selected" : ""}
-                >
-                    ${safe(doctor)}
-                </option>
-            `;
-
-        })
-        .join("");
-}
-
-/* ============================================================
-   ADD DOCTOR
-   ============================================================ */
-
-function addDoctor() {
-
-    const doctorName =
-        prompt("Enter new doctor name:");
-
-    if (!doctorName) {
+        console.error("K. Suvidha Hospital: #app was not found.");
         return;
     }
 
-    const cleanName =
-        doctorName.trim();
 
-    if (!cleanName) {
-        return;
+    /* ========================================================
+       SHARED DATA CONFIGURATION
+       ======================================================== */
+
+    /*
+       IMPORTANT:
+
+       false = browser-only saving.
+
+       true = use shared cloud database.
+
+       To make one computer see another computer's saved work,
+       you need a real shared database.
+
+       Example:
+
+       enabled: true,
+       url: "https://YOUR-DATABASE.firebaseio.com"
+
+       Do NOT leave an unrestricted public database online.
+    */
+
+    const CLOUD = {
+        enabled: false,
+        url: "PASTE_YOUR_FIREBASE_DATABASE_URL_HERE"
+    };
+
+
+    /* ========================================================
+       STORAGE
+       ======================================================== */
+
+    const STORAGE_KEY = "ksuvidhaDataV3";
+
+
+    function createEmptyState() {
+
+        return {
+
+            patientCounter: 0,
+
+            patients: [],
+
+            records: [],
+
+            consultations: [],
+
+            investigations: [],
+
+            prescriptions: [],
+
+            admissions: [],
+
+            followups: [],
+
+            discharges: [],
+
+            beds: [],
+
+            bills: [],
+
+            otBookings: [],
+
+            doctors: [],
+
+            currentPatientId: "",
+
+            selectedOT: ""
+
+        };
+
     }
 
-    let savedDoctors = [];
 
-    try {
-        savedDoctors =
-            JSON.parse(
-                localStorage.getItem(DOCTOR_KEY) || "[]"
-            );
-    } catch (error) {
-        savedDoctors = [];
-    }
+    function loadState() {
 
-    if (
-        DOCTORS.includes(cleanName) ||
-        savedDoctors.includes(cleanName)
-    ) {
+        try {
 
-        alert("Doctor already exists.");
+            const saved =
+                localStorage.getItem(STORAGE_KEY);
 
-        return;
-    }
-
-    savedDoctors.push(cleanName);
-
-    localStorage.setItem(
-        DOCTOR_KEY,
-        JSON.stringify(savedDoctors)
-    );
-
-    alert(
-        cleanName +
-        " has been added to the doctor database."
-    );
-
-    showHome();
-}
-
-/* ============================================================
-   PATIENT DATA
-   ============================================================ */
-
-function getPatient() {
-
-    try {
-
-        return JSON.parse(
-            localStorage.getItem(PATIENT_KEY) || "{}"
-        );
-
-    } catch (error) {
-
-        return {};
-
-    }
-}
-
-function savePatient(patient) {
-
-    localStorage.setItem(
-        PATIENT_KEY,
-        JSON.stringify(patient)
-    );
-}
-
-/* ============================================================
-   COLLECT CURRENT FORM DATA
-   ============================================================ */
-
-function collectRecordFields() {
-
-    const record = getPatient();
-
-    document
-        .querySelectorAll("[data-record]")
-        .forEach(function (element) {
-
-            record[element.dataset.record] =
-                element.value;
-
-        });
-
-    return record;
-}
-
-/* ============================================================
-   SAVE CURRENT FORM
-   ============================================================ */
-
-function saveCurrentForm() {
-
-    const patient =
-        collectRecordFields();
-
-    savePatient(patient);
-
-    localStorage.setItem(
-        PATIENT_RECORD_KEY,
-        JSON.stringify(patient)
-    );
-
-    alert(
-        "Patient information saved successfully."
-    );
-}
-
-/* ============================================================
-   LOAD SAVED PATIENT
-   ============================================================ */
-
-function loadPatientFields() {
-
-    const patient =
-        getPatient();
-
-    document
-        .querySelectorAll("[data-record]")
-        .forEach(function (element) {
-
-            const name =
-                element.dataset.record;
-
-            if (
-                patient[name] !== undefined &&
-                patient[name] !== null
-            ) {
-
-                element.value =
-                    patient[name];
-
+            if (!saved) {
+                return createEmptyState();
             }
 
-        });
-}
+            const data = JSON.parse(saved);
 
-/* ============================================================
-   FORM FIELD
-   ============================================================ */
+            return Object.assign(
+                createEmptyState(),
+                data
+            );
 
-function field(
-    label,
-    name,
-    type = "text",
-    value = ""
-) {
+        } catch (error) {
 
-    return `
-        <label class="paper-field">
+            console.error(error);
 
-            <span>
-                ${safe(label)}
-            </span>
+            return createEmptyState();
+        }
 
-            <input
-                type="${type}"
-                name="${safe(name)}"
-                data-record="${safe(name)}"
-                value="${safe(value)}"
-            >
+    }
 
-        </label>
-    `;
-}
 
-/* ============================================================
-   TEXTAREA
-   ============================================================ */
+    const state = loadState();
 
-function area(
-    label,
-    name,
-    value = ""
-) {
 
-    return `
-        <label class="paper-field paper-full">
+    /* ========================================================
+       DOCTORS
+       ======================================================== */
 
-            <span>
-                ${safe(label)}
-            </span>
+    const DEFAULT_DOCTORS = [
 
-            <textarea
-                name="${safe(name)}"
-                data-record="${safe(name)}"
-            >${safe(value)}</textarea>
+        "Dr. ANIRUDH KULKARNI",
+        "Dr. SHEKAR .M",
+        "Dr. RAMESH BABU",
+        "Dr. RAMESH .C",
+        "Dr. SHAHBAZ",
+        "Dr. VISHALAKSHI",
+        "Dr. SAI RAGHAVENDRA",
+        "Dr. PRASHANT",
+        "Dr. KARTHIK",
+        "Dr. VINAY BADRI",
+        "Dr. PAVAN",
+        "Dr. JYOTHI",
+        "Dr. RAMESH SAGAR",
+        "dr sagar",
+        "dr cn kulkarni"
 
-        </label>
-    `;
-}
+    ];
 
-/* ============================================================
-   DOCTOR SELECT
-   ============================================================ */
 
-function doctorField(
-    name = "doctor",
-    selected = ""
-) {
+    state.doctors =
+        Array.from(
+            new Set(
+                [
+                    ...DEFAULT_DOCTORS,
+                    ...(state.doctors || [])
+                ]
+            )
+        );
 
-    return `
-        <label class="paper-field">
 
-            <span>
-                Doctor
-            </span>
+    function saveState() {
 
-            <select
-                name="${safe(name)}"
-                data-record="${safe(name)}"
-            >
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(state)
+        );
 
-                <option value="">
-                    Select Doctor
-                </option>
+        if (CLOUD.enabled) {
+            cloudSave();
+        }
 
-                ${doctorOptions(selected)}
+    }
 
-            </select>
 
-        </label>
-    `;
-}
+    /* ========================================================
+       GENERAL HELPERS
+       ======================================================== */
 
-/* ============================================================
-   COMMON PAPER HEADER
-   ============================================================ */
+    function uid(prefix) {
 
-function paperHeader(title) {
+        return (
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 8)
+        );
 
-    const patient =
-        getPatient();
+    }
 
-    return `
 
-        <div class="hospital-paper">
+    function escapeHTML(value) {
 
-            <div class="paper-header">
+        return String(
+            value === undefined ||
+            value === null
+                ? ""
+                : value
+        )
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
-                <div class="paper-logo">
+    }
 
-                    <img
-                        src="${HOSPITAL_LOGO}"
-                        alt="K. Suvidha Hospital Logo"
-                    >
 
-                </div>
+    function getValue(id) {
 
-                <div class="hospital-heading">
+        const element =
+            document.getElementById(id);
 
-                    <div class="hospital-kannada">
-                        ಕೆ. ಸುವಿಧಾ ಆಸ್ಪತ್ರೆ
+        if (!element) {
+            return "";
+        }
+
+        return element.value.trim();
+
+    }
+
+
+    function setValue(id, value) {
+
+        const element =
+            document.getElementById(id);
+
+        if (element) {
+            element.value = value || "";
+        }
+
+    }
+
+
+    function today() {
+
+        return new Date()
+            .toISOString()
+            .slice(0, 10);
+
+    }
+
+
+    function printCurrentPage() {
+
+        window.print();
+
+    }
+
+    window.printCurrentPage =
+        printCurrentPage;
+
+
+    /* ========================================================
+       MENU
+       ======================================================== */
+
+    function openMenu() {
+
+        const menu =
+            document.getElementById("sideMenu") ||
+            document.querySelector(".side-menu");
+
+        if (menu) {
+
+            menu.classList.add("open");
+
+        }
+
+    }
+
+
+    function closeMenu() {
+
+        const menu =
+            document.getElementById("sideMenu") ||
+            document.querySelector(".side-menu");
+
+        if (menu) {
+
+            menu.classList.remove("open");
+
+        }
+
+    }
+
+
+    window.openMenu = openMenu;
+    window.closeMenu = closeMenu;
+
+
+    /* ========================================================
+       PAGE HEADER
+       ======================================================== */
+
+    function pageHeader(title, description) {
+
+        return `
+
+            <div class="ks-page-head">
+
+                <div>
+
+                    <div class="ks-eyebrow">
+                        K. SUVIDHA HOSPITAL
                     </div>
 
                     <h1>
-                        ${HOSPITAL_NAME}
+                        ${escapeHTML(title)}
                     </h1>
 
-                    <div>
-                        ${HOSPITAL_SUBTITLE}
-                    </div>
-
-                    <div>
-                        ${HOSPITAL_ADDRESS}
-                    </div>
-
-                    <div>
-                        ${HOSPITAL_PHONE}
-                    </div>
+                    <p>
+                        ${escapeHTML(description || "")}
+                    </p>
 
                 </div>
 
-            </div>
-
-            <div class="paper-doctor-row">
-
-                ${doctorField(
-                    "mainDoctor",
-                    patient.mainDoctor || ""
-                )}
-
-                <button
-                    type="button"
-                    onclick="addDoctor()"
-                >
-                    + Add Doctor
-                </button>
-
-            </div>
-
-            <div class="patient-top-grid">
-
-                ${field(
-                    "Patient Name",
-                    "patientName",
-                    "text",
-                    patient.patientName || ""
-                )}
-
-                ${field(
-                    "UHID / IP No",
-                    "uhid",
-                    "text",
-                    patient.uhid || ""
-                )}
-
-                ${field(
-                    "Age",
-                    "age",
-                    "number",
-                    patient.age || ""
-                )}
-
-                <label class="paper-field">
-
-                    <span>
-                        Sex
-                    </span>
-
-                    <select
-                        name="sex"
-                        data-record="sex"
-                    >
-
-                        <option value="">
-                            Select
-                        </option>
-
-                        <option
-                            ${patient.sex === "Male"
-                                ? "selected"
-                                : ""}
-                        >
-                            Male
-                        </option>
-
-                        <option
-                            ${patient.sex === "Female"
-                                ? "selected"
-                                : ""}
-                        >
-                            Female
-                        </option>
-
-                        <option
-                            ${patient.sex === "Other"
-                                ? "selected"
-                                : ""}
-                        >
-                            Other
-                        </option>
-
-                    </select>
-
-                </label>
-
-                ${field(
-                    "Date",
-                    "date",
-                    "date",
-                    patient.date || ""
-                )}
-
-                ${field(
-                    "Weight",
-                    "weight",
-                    "text",
-                    patient.weight || ""
-                )}
-
-                ${field(
-                    "B.P.",
-                    "bp",
-                    "text",
-                    patient.bp || ""
-                )}
-
-                ${field(
-                    "Pulse",
-                    "pulse",
-                    "text",
-                    patient.pulse || ""
-                )}
-
-            </div>
-
-            <h2 class="paper-title">
-                ${safe(title)}
-            </h2>
-    `;
-}
-
-/* ============================================================
-   PAPER FOOTER
-   ============================================================ */
-
-function paperFooter() {
-
-    return `
-
-            <div class="paper-footer">
-
-                <div>
-                    Signature of Patient / Attendant
-                </div>
-
-                <div>
-                    Doctor Signature
-                </div>
-
-            </div>
-
-        </div>
-    `;
-}
-
-/* ============================================================
-   HOME PAGE
-   ============================================================ */
-
-function showHome() {
-
-    getApp();
-
-    if (!app) {
-        return;
-    }
-
-    app.innerHTML = `
-
-        <div class="home-page">
-
-            <div class="home-card">
-
-                <img
-                    class="home-logo"
-                    src="${HOSPITAL_LOGO}"
-                    alt="K. Suvidha Hospital"
-                >
-
-                <h1>
-                    ${HOSPITAL_NAME}
-                </h1>
-
-                <p>
-                    ${HOSPITAL_SUBTITLE}
-                </p>
-
-                <div class="hero-buttons">
+                <div class="ks-head-actions">
 
                     <button
-                        class="primary-button"
-                        onclick="showPage('patient-record')"
-                    >
-                        📁 PATIENTS RECORD
+                        type="button"
+                        onclick="showPage('home')">
+
+                        Home
+
                     </button>
 
                     <button
-                        class="secondary-button"
-                        onclick="showPage('registration')"
-                    >
-                        👤 Patient Registration
-                    </button>
+                        type="button"
+                        onclick="printCurrentPage()">
 
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('consultation')"
-                    >
-                        🩺 Consultation
-                    </button>
+                        Print
 
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('billing')"
-                    >
-                        💰 Billing
-                    </button>
-
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('discharge')"
-                    >
-                        📄 Discharge Summary
-                    </button>
-
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('beds')"
-                    >
-                        🛏 BED MANAGEMENT
-                        <small>
-                            25 Bed Hospital
-                        </small>
-                    </button>
-
-                    <button
-                        class="secondary-button"
-                        onclick="showPage('ot-slot')"
-                    >
-                        🏥 O.T SLOT
-                        <small>
-                            Operation Theatre Booking
-                        </small>
-                    </button>
-
-                    <button
-                        class="secondary-button"
-                        onclick="addDoctor()"
-                    >
-                        👨‍⚕️ DOCTOR DATABASE
-                        <small>
-                            Add Doctor
-                        </small>
-                    </button>
-
-                    <button
-                        class="suvidha-home-button"
-                        onclick="showPage('suvidha')"
-                    >
-                        🤖 SUVIDHA AI
-                        <small>
-                            Hospital Reception Assistant
-                        </small>
                     </button>
 
                 </div>
 
             </div>
-
-        </div>
-    `;
-}
-
-/* ============================================================
-   PATIENT RECORD PAGE LIST
-   ============================================================ */
-
-const patientRecordPages = [
-    "Front Page",
-    "Registration",
-    "Consultation",
-    "X-Ray / Blood / Investigations",
-    "Prescription / Pharmacy",
-    "Admission & Treatment",
-    "Billing",
-    "Follow-up",
-    "Discharge Summary"
-];
-
-/* ============================================================
-   PATIENT RECORD
-   ============================================================ */
-
-function showPatientRecord(page = 1) {
-
-    getApp();
-
-    if (!app) {
-        return;
-    }
-
-    page =
-        Number(page) || 1;
-
-    if (page < 1) {
-        page = 1;
-    }
-
-    if (page > 9) {
-        page = 9;
-    }
-
-    let content = "";
-
-    /* ========================================================
-       PAGE 1
-       ======================================================== */
-
-    if (page === 1) {
-
-        content = `
-
-            <div class="paper-section">
-
-                <h3>
-                    Hospital Services
-                </h3>
-
-                <div class="paper-check-list">
-
-                    <label>
-                        <input type="checkbox">
-                        Emergency Services
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        OPD Consultation
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        Laboratory
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        X-Ray
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        Pharmacy
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        Admission
-                    </label>
-
-                    <label>
-                        <input type="checkbox">
-                        Surgery
-                    </label>
-
-                </div>
-
-            </div>
-
-            ${area(
-                "Patient Initial Notes",
-                "initialNotes"
-            )}
-
-            ${area(
-                "Address",
-                "address"
-            )}
-
-            ${area(
-                "Emergency Contact",
-                "emergencyContact"
-            )}
 
         `;
+
     }
 
-    /* ========================================================
-       PAGE 2
-       ======================================================== */
-
-    if (page === 2) {
-
-        content = `
-
-            <div class="paper-grid">
-
-                ${field(
-                    "Date of Birth",
-                    "dob",
-                    "date"
-                )}
-
-                ${field(
-                    "Occupation",
-                    "occupation"
-                )}
-
-                ${field(
-                    "Marital Status",
-                    "maritalStatus"
-                )}
-
-                ${field(
-                    "Referral",
-                    "referral"
-                )}
-
-                ${field(
-                    "Department",
-                    "department"
-                )}
-
-                ${field(
-                    "Registration Number",
-                    "registrationNumber"
-                )}
-
-            </div>
-
-            ${area(
-                "Full Address",
-                "registrationAddress"
-            )}
-
-            ${area(
-                "Registration Notes",
-                "registrationNotes"
-            )}
-
-        `;
-    }
 
     /* ========================================================
-       PAGE 3
+       FIELD BUILDERS
        ======================================================== */
 
-    if (page === 3) {
-
-        content = `
-
-            ${area(
-                "Chief Complaints",
-                "chiefComplaints"
-            )}
-
-            ${area(
-                "History of Present Illness",
-                "historyPresentIllness"
-            )}
-
-            ${area(
-                "Past Medical / Surgical History",
-                "pastHistory"
-            )}
-
-            ${area(
-                "Clinical Examination",
-                "clinicalExamination"
-            )}
-
-            ${area(
-                "Diagnosis",
-                "diagnosis"
-            )}
-
-            ${area(
-                "Treatment Plan",
-                "treatmentPlan"
-            )}
-
-            ${area(
-                "Doctor Notes",
-                "consultationNotes"
-            )}
-
-        `;
-    }
-
-    /* ========================================================
-       PAGE 4
-       ======================================================== */
-
-    if (page === 4) {
-
-        content = `
-
-            <div class="paper-grid">
-
-                ${field(
-                    "Investigation Date",
-                    "investigationDate",
-                    "date"
-                )}
-
-                ${field(
-                    "Investigation Type",
-                    "investigationType"
-                )}
-
-            </div>
-
-            ${area(
-                "X-Ray Details",
-                "xrayDetails"
-            )}
-
-            ${area(
-                "X-Ray Findings",
-                "xrayFindings"
-            )}
-
-            ${area(
-                "Blood Test",
-                "bloodTest"
-            )}
-
-            ${area(
-                "Other Investigations",
-                "otherInvestigations"
-            )}
-
-            ${area(
-                "Results",
-                "investigationResults"
-            )}
-
-            ${area(
-                "Doctor / Radiologist Impression",
-                "investigationImpression"
-            )}
-
-        `;
-    }
-
-    /* ========================================================
-       PAGE 5
-       ======================================================== */
-
-    if (page === 5) {
-
-        content = `
-
-            ${field(
-                "Prescription Date",
-                "prescriptionDate",
-                "date"
-            )}
-
-            <div class="medicine-block">
-
-                <h3>
-                    Medicine 1
-                </h3>
-
-                <div class="paper-grid">
-
-                    ${field(
-                        "Medicine",
-                        "medicine1"
-                    )}
-
-                    ${field(
-                        "Dose",
-                        "dose1"
-                    )}
-
-                    ${field(
-                        "Frequency",
-                        "frequency1"
-                    )}
-
-                    ${field(
-                        "Duration",
-                        "duration1"
-                    )}
-
-                </div>
-
-            </div>
-
-            <div class="medicine-block">
-
-                <h3>
-                    Medicine 2
-                </h3>
-
-                <div class="paper-grid">
-
-                    ${field(
-                        "Medicine",
-                        "medicine2"
-                    )}
-
-                    ${field(
-                        "Dose",
-                        "dose2"
-                    )}
-
-                    ${field(
-                        "Frequency",
-                        "frequency2"
-                    )}
-
-                    ${field(
-                        "Duration",
-                        "duration2"
-                    )}
-
-                </div>
-
-            </div>
-
-            ${area(
-                "Additional Medicines",
-                "additionalMedicines"
-            )}
-
-            ${area(
-                "Pharmacy Instructions",
-                "pharmacyInstructions"
-            )}
-
-        `;
-    }
-
-    /* ========================================================
-       PAGE 6
-       ======================================================== */
-
-    if (page === 6) {
-
-        const patient =
-            getPatient();
-
-        content = `
-
-            <div class="paper-grid">
-
-                ${field(
-                    "Admission Date",
-                    "admissionDate",
-                    "date"
-                )}
-
-                ${field(
-                    "Admission Time",
-                    "admissionTime",
-                    "time"
-                )}
-
-                ${field(
-                    "Ward / Room",
-                    "wardRoom"
-                )}
-
-                ${field(
-                    "Bed",
-                    "bedNumber"
-                )}
-
-                ${doctorField(
-                    "attendingDoctor",
-                    patient.attendingDoctor || ""
-                )}
-
-                ${field(
-                    "Procedure / Surgery Date",
-                    "surgeryDate",
-                    "date"
-                )}
-
-            </div>
-
-            ${area(
-                "Admission Diagnosis",
-                "admissionDiagnosis"
-            )}
-
-            ${area(
-                "Treatment",
-                "admissionTreatment"
-            )}
-
-            ${area(
-                "Procedure / Surgery",
-                "procedureSurgery"
-            )}
-
-            ${area(
-                "Daily Treatment Notes",
-                "dailyTreatmentNotes"
-            )}
-
-            ${area(
-                "Nursing Notes",
-                "nursingNotes"
-            )}
-
-            ${area(
-                "Hospital Course",
-                "hospitalCourse"
-            )}
-
-        `;
-    }
-
-    /* ========================================================
-       PAGE 7
-       ======================================================== */
-
-    if (page === 7) {
-
-        content = `
-
-            ${field(
-                "Bill Date",
-                "billDate",
-                "date"
-            )}
-
-            ${field(
-                "Bill Number",
-                "billNumber"
-            )}
-
-            <div class="paper-grid">
-
-                ${field(
-                    "Consultation Charges",
-                    "consultationCharges"
-                )}
-
-                ${field(
-                    "Investigation Charges",
-                    "investigationCharges"
-                )}
-
-                ${field(
-                    "Procedure Charges",
-                    "procedureCharges"
-                )}
-
-                ${field(
-                    "Room Charges",
-                    "roomCharges"
-                )}
-
-                ${field(
-                    "Pharmacy Charges",
-                    "pharmacyCharges"
-                )}
-
-                ${field(
-                    "Other Charges",
-                    "otherCharges"
-                )}
-
-                ${field(
-                    "Discount",
-                    "recordDiscount"
-                )}
-
-                ${field(
-                    "Amount Paid",
-                    "recordAmountPaid"
-                )}
-
-            </div>
-
-            <label class="paper-field">
+    function field(
+        label,
+        id,
+        type = "text",
+        placeholder = ""
+    ) {
+
+        return `
+
+            <label class="ks-field">
 
                 <span>
-                    Payment Mode
+                    ${escapeHTML(label)}
                 </span>
 
-                <select
-                    data-record="recordPaymentMode"
-                >
+                <input
+                    id="${id}"
+                    type="${type}"
+                    placeholder="${escapeHTML(placeholder)}">
+
+            </label>
+
+        `;
+
+    }
+
+
+    function area(
+        label,
+        id,
+        placeholder = ""
+    ) {
+
+        return `
+
+            <label class="ks-field full">
+
+                <span>
+                    ${escapeHTML(label)}
+                </span>
+
+                <textarea
+                    id="${id}"
+                    placeholder="${escapeHTML(placeholder)}">
+                </textarea>
+
+            </label>
+
+        `;
+
+    }
+
+
+    function selectField(
+        label,
+        id,
+        options
+    ) {
+
+        return `
+
+            <label class="ks-field">
+
+                <span>
+                    ${escapeHTML(label)}
+                </span>
+
+                <select id="${id}">
 
                     <option value="">
                         Select
                     </option>
 
-                    <option>
-                        Cash
-                    </option>
-
-                    <option>
-                        UPI
-                    </option>
-
-                    <option>
-                        Card
-                    </option>
-
-                    <option>
-                        Bank Transfer
-                    </option>
+                    ${options
+                        .map(
+                            option =>
+                                `<option>
+                                    ${escapeHTML(option)}
+                                </option>`
+                        )
+                        .join("")}
 
                 </select>
 
             </label>
 
-            ${area(
-                "Billing Notes",
-                "billingNotes"
-            )}
-
         `;
+
     }
 
+
     /* ========================================================
-       PAGE 8
+       PAGE ROUTER
        ======================================================== */
 
-    if (page === 8) {
+    function showPage(page) {
 
-        const patient =
-            getPatient();
+        closeMenu();
 
-        content = `
+        if (page === "home") {
+            showHome();
+        }
 
-            <div class="paper-grid">
+        else if (page === "patient-record") {
+            showPatientRecord(1);
+        }
+
+        else if (page === "registration") {
+            showRegistration();
+        }
+
+        else if (page === "consultation") {
+            showConsultation();
+        }
+
+        else if (page === "investigations") {
+            showInvestigations();
+        }
+
+        else if (page === "prescription") {
+            showPrescription();
+        }
+
+        else if (page === "admission") {
+            showAdmission();
+        }
+
+        else if (page === "billing") {
+            showBilling();
+        }
+
+        else if (page === "followup") {
+            showFollowup();
+        }
+
+        else if (page === "discharge") {
+            showDischarge();
+        }
+
+        else if (page === "beds") {
+            showBeds();
+        }
+
+        else if (page === "ot") {
+            showOT();
+        }
+
+        else if (page === "saved-files") {
+            showSavedFiles();
+        }
+
+        else if (page === "suvidha") {
+            showSuvidha();
+        }
+
+        else {
+            showHome();
+        }
+
+        window.scrollTo(0, 0);
+
+    }
+
+    window.showPage = showPage;
+
+
+    /* ========================================================
+       HOME
+       ======================================================== */
+
+    function showHome() {
+
+        app.innerHTML = `
+
+            <main class="ks-home">
+
+                <section class="ks-hero">
+
+                    <div>
+
+                        <div class="ks-eyebrow">
+                            K. SUVIDHA HOSPITAL
+                        </div>
+
+                        <h1>
+                            Super Speciality Orthopaedic
+                            & Multispeciality Hospital
+                        </h1>
+
+                        <p>
+                            Hospital management software for
+                            patient registration, consultation,
+                            treatment, billing, follow-up,
+                            discharge, beds and O.T. booking.
+                        </p>
+
+                        <div class="ks-hero-actions">
+
+                            <button
+                                class="primary"
+                                onclick="showPage('patient-record')">
+
+                                Patients Record
+
+                            </button>
+
+                            <button
+                                onclick="showPage('registration')">
+
+                                Register Patient
+
+                            </button>
+
+                            <button
+                                onclick="showPage('saved-files')">
+
+                                Saved Files
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="ks-hero-logo">
+
+                        <img
+                            src="image.png"
+                            alt="K. Suvidha Hospital Logo">
+
+                        <div>
+                            K. Suvidha Hospital
+                        </div>
+
+                        <small>
+                            Raichur
+                        </small>
+
+                    </div>
+
+                </section>
+
+
+                <section class="ks-cards">
+
+                    <button
+                        onclick="showPage('patient-record')">
+
+                        <b>Patients Record</b>
+
+                        <span>
+                            Complete patient file
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('consultation')">
+
+                        <b>Consultation</b>
+
+                        <span>
+                            Clinical consultation
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('investigations')">
+
+                        <b>Investigations</b>
+
+                        <span>
+                            X-Ray, blood tests and reports
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('prescription')">
+
+                        <b>Prescription / Pharmacy</b>
+
+                        <span>
+                            Medicines and instructions
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('admission')">
+
+                        <b>Admission & Treatment</b>
+
+                        <span>
+                            Ward, room and treatment
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('billing')">
+
+                        <b>Billing</b>
+
+                        <span>
+                            Hospital billing
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('followup')">
+
+                        <b>Follow-up</b>
+
+                        <span>
+                            Review and next visit
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('discharge')">
+
+                        <b>Discharge Summary</b>
+
+                        <span>
+                            Final summary and print
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('beds')">
+
+                        <b>Beds</b>
+
+                        <span>
+                            25-bed occupancy
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('ot')">
+
+                        <b>O.T. SLOT</b>
+
+                        <span>
+                            Book Modular or General Surgery O.T.
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="ai-card"
+                        onclick="showPage('suvidha')">
+
+                        <b>
+                            SUVIDHA AI
+                        </b>
+
+                        <span>
+                            Hospital software assistant
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        onclick="showPage('saved-files')">
+
+                        <b>
+                            Saved Files
+                        </b>
+
+                        <span>
+                            Open saved hospital work
+                        </span>
+
+                    </button>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+
+    /* ========================================================
+       PATIENT RECORD
+       ======================================================== */
+
+    const PATIENT_PAGES = [
+
+        "Front Page",
+        "Registration",
+        "Consultation",
+        "X-Ray / Blood / Investigations",
+        "Prescription / Pharmacy",
+        "Admission & Treatment",
+        "Billing",
+        "Follow-up",
+        "Discharge Summary"
+
+    ];
+
+
+    function showPatientRecord(page = 1) {
+
+        page =
+            Math.max(
+                1,
+                Math.min(
+                    9,
+                    Number(page) || 1
+                )
+            );
+
+
+        let content = "";
+
+
+        if (page === 1) {
+
+            content = `
+
+                ${field(
+                    "UHID / IP Number",
+                    "prUhid"
+                )}
+
+                ${field(
+                    "Patient Name",
+                    "prName"
+                )}
+
+                ${field(
+                    "Father / Husband Name",
+                    "prRelative"
+                )}
+
+                ${field(
+                    "Mobile Number",
+                    "prMobile"
+                )}
+
+                ${field(
+                    "Age",
+                    "prAge",
+                    "number"
+                )}
+
+                ${selectField(
+                    "Sex",
+                    "prSex",
+                    [
+                        "Male",
+                        "Female",
+                        "Other"
+                    ]
+                )}
+
+                ${field(
+                    "Registration Date",
+                    "prDate",
+                    "date"
+                )}
+
+                ${field(
+                    "Consultant Doctor",
+                    "prDoctor"
+                )}
+
+                ${area(
+                    "Address",
+                    "prAddress"
+                )}
+
+                ${area(
+                    "Reason for Visit",
+                    "prReason"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 2) {
+
+            content = `
+
+                ${field(
+                    "Registration Number",
+                    "regNo"
+                )}
+
+                ${field(
+                    "Patient Name",
+                    "regName"
+                )}
+
+                ${field(
+                    "Mobile",
+                    "regMobile"
+                )}
+
+                ${field(
+                    "Date",
+                    "regDate",
+                    "date"
+                )}
+
+                ${area(
+                    "Address",
+                    "regAddress"
+                )}
+
+                ${area(
+                    "Registration Notes",
+                    "regNotes"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 3) {
+
+            content = `
+
+                ${field(
+                    "Doctor",
+                    "conDoctor"
+                )}
+
+                ${field(
+                    "Visit Date",
+                    "conDate",
+                    "date"
+                )}
+
+                ${area(
+                    "Chief Complaints",
+                    "conComplaints"
+                )}
+
+                ${area(
+                    "History",
+                    "conHistory"
+                )}
+
+                ${area(
+                    "Examination",
+                    "conExam"
+                )}
+
+                ${area(
+                    "Diagnosis",
+                    "conDiagnosis"
+                )}
+
+                ${area(
+                    "Treatment Plan",
+                    "conPlan"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 4) {
+
+            content = `
+
+                ${field(
+                    "Investigation Date",
+                    "invDate",
+                    "date"
+                )}
+
+                ${field(
+                    "X-Ray",
+                    "invXray"
+                )}
+
+                ${area(
+                    "Blood Test Results",
+                    "invBlood"
+                )}
+
+                ${area(
+                    "Other Investigations",
+                    "invOther"
+                )}
+
+                ${area(
+                    "Impression",
+                    "invImpression"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 5) {
+
+            content = `
+
+                ${field(
+                    "Prescription Date",
+                    "rxDate",
+                    "date"
+                )}
+
+                ${area(
+                    "Medicines",
+                    "rxMedicines"
+                )}
+
+                ${area(
+                    "Dose / Frequency / Duration",
+                    "rxDose"
+                )}
+
+                ${area(
+                    "Instructions",
+                    "rxInstructions"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 6) {
+
+            content = `
+
+                ${field(
+                    "Admission Date",
+                    "admDate",
+                    "date"
+                )}
+
+                ${selectField(
+                    "Area",
+                    "admArea",
+                    [
+                        "Ward",
+                        "Daycare",
+                        "ICU",
+                        "Casualty",
+                        "Special Room"
+                    ]
+                )}
+
+                ${field(
+                    "Bed Number",
+                    "admBed"
+                )}
+
+                ${field(
+                    "Doctor",
+                    "admDoctor"
+                )}
+
+                ${area(
+                    "Treatment / Procedures",
+                    "admTreatment"
+                )}
+
+                ${area(
+                    "Hospital Course",
+                    "admCourse"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 7) {
+
+            content = `
+
+                ${field(
+                    "Bill Number",
+                    "billNo"
+                )}
+
+                ${field(
+                    "Total",
+                    "billTotal",
+                    "number"
+                )}
+
+                ${field(
+                    "Discount",
+                    "billDiscount",
+                    "number"
+                )}
+
+                ${field(
+                    "Paid",
+                    "billPaid",
+                    "number"
+                )}
+
+                ${field(
+                    "Balance",
+                    "billBalance",
+                    "number"
+                )}
+
+                ${selectField(
+                    "Payment Mode",
+                    "billMode",
+                    [
+                        "Cash",
+                        "Card",
+                        "UPI",
+                        "Insurance",
+                        "Other"
+                    ]
+                )}
+
+                ${area(
+                    "Billing Notes",
+                    "billNotes"
+                )}
+
+            `;
+
+        }
+
+
+        if (page === 8) {
+
+            content = `
 
                 ${field(
                     "Follow-up Date",
-                    "followupDate",
+                    "fuDate",
                     "date"
+                )}
+
+                ${field(
+                    "Doctor",
+                    "fuDoctor"
+                )}
+
+                ${area(
+                    "Progress",
+                    "fuProgress"
+                )}
+
+                ${area(
+                    "Medicines",
+                    "fuMedicines"
+                )}
+
+                ${area(
+                    "Advice",
+                    "fuAdvice"
                 )}
 
                 ${field(
                     "Next Appointment",
-                    "nextAppointment",
+                    "fuNextDate",
                     "date"
                 )}
 
-                ${doctorField(
-                    "followupDoctor",
-                    patient.followupDoctor || ""
-                )}
+            `;
 
-                ${field(
-                    "Review Type",
-                    "reviewType"
-                )}
+        }
 
-            </div>
 
-            ${area(
-                "Condition",
-                "followupCondition"
-            )}
+        if (page === 9) {
 
-            ${area(
-                "Progress / Findings",
-                "followupFindings"
-            )}
-
-            ${area(
-                "Medicines Continued / Changed",
-                "followupMedicines"
-            )}
-
-            ${area(
-                "Advice",
-                "followupAdvice"
-            )}
-
-            ${area(
-                "Next Plan",
-                "followupPlan"
-            )}
-
-            ${area(
-                "Doctor Notes",
-                "followupDoctorNotes"
-            )}
-
-        `;
-    }
-
-    /* ========================================================
-       PAGE 9
-       ======================================================== */
-
-    if (page === 9) {
-
-        content = `
-
-            <div class="paper-grid">
-
-                ${field(
-                    "Admission Date",
-                    "dischargeAdmissionDate",
-                    "date"
-                )}
+            content = `
 
                 ${field(
                     "Discharge Date",
-                    "dischargeDate",
+                    "dsDate",
                     "date"
                 )}
 
                 ${field(
-                    "Discharge Time",
-                    "dischargeTime",
-                    "time"
+                    "Doctor",
+                    "dsDoctor"
                 )}
 
-                ${field(
-                    "Discharge Type",
-                    "dischargeType"
+                ${area(
+                    "Final Diagnosis",
+                    "dsDiagnosis"
                 )}
 
-            </div>
+                ${area(
+                    "Treatment Given",
+                    "dsTreatment"
+                )}
 
-            ${area(
-                "Final Diagnosis",
-                "finalDiagnosis"
-            )}
+                ${area(
+                    "Medicines at Discharge",
+                    "dsMedicines"
+                )}
 
-            ${area(
-                "Chief Complaints",
-                "dischargeComplaints"
-            )}
+                ${area(
+                    "Discharge Advice",
+                    "dsAdvice"
+                )}
 
-            ${area(
-                "History / Clinical Findings",
-                "dischargeClinicalFindings"
-            )}
+                ${area(
+                    "Follow-up Advice",
+                    "dsFollowup"
+                )}
 
-            ${area(
-                "Investigations",
-                "dischargeInvestigations"
-            )}
+            `;
 
-            ${area(
-                "Procedure / Surgery",
-                "dischargeProcedure"
-            )}
+        }
 
-            ${area(
-                "Hospital Course",
-                "dischargeHospitalCourse"
-            )}
 
-            ${area(
-                "Condition at Discharge",
-                "conditionAtDischarge"
-            )}
+        app.innerHTML = `
 
-            ${area(
-                "Medicines",
-                "dischargeMedicines"
-            )}
+            <main class="ks-page">
 
-            ${area(
-                "Advice",
-                "dischargeAdvice"
-            )}
+                ${pageHeader(
+                    "Patients Record",
+                    PATIENT_PAGES[page - 1]
+                )}
 
-            ${area(
-                "Follow-up",
-                "dischargeFollowup"
-            )}
 
-            ${area(
-                "Additional Notes",
-                "dischargeAdditionalNotes"
-            )}
+                <section class="ks-paper">
 
-        `;
-    }
+                    <div class="ks-paper-head">
 
-    app.innerHTML =
-        paperHeader(
-            patientRecordPages[page - 1]
-        ) +
-        content +
-        paperFooter();
+                        <img
+                            src="image.png"
+                            alt="Hospital Logo">
 
-    loadPatientFields();
+                        <div>
 
-    app.innerHTML += `
+                            <b>
+                                K. SUVIDHA HOSPITAL
+                            </b>
 
-        <div class="record-navigation">
-
-            <button
-                onclick="showPage('home')"
-            >
-                🏠 Home
-            </button>
-
-            <button
-                onclick="showPatientRecord(${page - 1})"
-                ${page === 1 ? "disabled" : ""}
-            >
-                ◀ Previous
-            </button>
-
-            <span>
-                Page ${page} of 9
-            </span>
-
-            <button
-                onclick="showPatientRecord(${page + 1})"
-                ${page === 9 ? "disabled" : ""}
-            >
-                Next ▶
-            </button>
-
-            <button
-                onclick="saveCurrentForm()"
-            >
-                💾 Save
-            </button>
-
-            <button
-                onclick="window.print()"
-            >
-                🖨 Print
-            </button>
-
-        </div>
-    `;
-}
-
-/* ============================================================
-   REGISTRATION
-   ============================================================ */
-
-function showRegistration() {
-
-    getApp();
-
-    const patient =
-        getPatient();
-
-    app.innerHTML = `
-
-        ${paperHeader(
-            "PATIENT REGISTRATION"
-        )}
-
-        <div class="paper-grid">
-
-            ${field(
-                "Patient Name",
-                "patientName",
-                "text",
-                patient.patientName || ""
-            )}
-
-            ${field(
-                "UHID / IP No",
-                "uhid",
-                "text",
-                patient.uhid || ""
-            )}
-
-            ${field(
-                "Age",
-                "age",
-                "number",
-                patient.age || ""
-            )}
-
-            ${field(
-                "Date of Birth",
-                "dob",
-                "date",
-                patient.dob || ""
-            )}
-
-            ${field(
-                "Mobile",
-                "mobile",
-                "tel",
-                patient.mobile || ""
-            )}
-
-            ${field(
-                "Occupation",
-                "occupation",
-                "text",
-                patient.occupation || ""
-            )}
-
-        </div>
-
-        ${area(
-            "Full Address",
-            "address"
-        )}
-
-        ${area(
-            "Registration Notes",
-            "registrationNotes"
-        )}
-
-        ${paperFooter()}
-
-        <div class="record-navigation">
-
-            <button onclick="showPage('home')">
-                🏠 Home
-            </button>
-
-            <button onclick="saveCurrentForm()">
-                💾 Save Registration
-            </button>
-
-            <button onclick="window.print()">
-                🖨 Print
-            </button>
-
-        </div>
-    `;
-
-    loadPatientFields();
-}
-
-/* ============================================================
-   CONSULTATION
-   ============================================================ */
-
-function showConsultation() {
-
-    getApp();
-
-    app.innerHTML = `
-
-        ${paperHeader(
-            "CONSULTATION"
-        )}
-
-        ${area(
-            "Chief Complaints",
-            "chiefComplaints"
-        )}
-
-        ${area(
-            "History of Present Illness",
-            "historyPresentIllness"
-        )}
-
-        ${area(
-            "Past Medical / Surgical History",
-            "pastHistory"
-        )}
-
-        ${area(
-            "Clinical Examination",
-            "clinicalExamination"
-        )}
-
-        ${area(
-            "Diagnosis",
-            "diagnosis"
-        )}
-
-        ${area(
-            "Treatment Plan",
-            "treatmentPlan"
-        )}
-
-        ${area(
-            "Doctor Notes",
-            "consultationNotes"
-        )}
-
-        ${paperFooter()}
-
-        <div class="record-navigation">
-
-            <button onclick="showPage('home')">
-                🏠 Home
-            </button>
-
-            <button onclick="saveCurrentForm()">
-                💾 Save
-            </button>
-
-            <button onclick="window.print()">
-                🖨 Print
-            </button>
-
-        </div>
-    `;
-
-    loadPatientFields();
-}
-
-/* ============================================================
-   DISCHARGE SUMMARY
-   ============================================================ */
-
-function showDischarge() {
-
-    getApp();
-
-    app.innerHTML = `
-
-        ${paperHeader(
-            "DISCHARGE SUMMARY"
-        )}
-
-        <div class="paper-grid">
-
-            ${field(
-                "Admission Date",
-                "dischargeAdmissionDate",
-                "date"
-            )}
-
-            ${field(
-                "Discharge Date",
-                "dischargeDate",
-                "date"
-            )}
-
-            ${field(
-                "Discharge Time",
-                "dischargeTime",
-                "time"
-            )}
-
-            ${field(
-                "Discharge Type",
-                "dischargeType"
-            )}
-
-        </div>
-
-        ${area(
-            "Final Diagnosis",
-            "finalDiagnosis"
-        )}
-
-        ${area(
-            "Chief Complaints",
-            "dischargeComplaints"
-        )}
-
-        ${area(
-            "Clinical Findings",
-            "dischargeClinicalFindings"
-        )}
-
-        ${area(
-            "Investigations",
-            "dischargeInvestigations"
-        )}
-
-        ${area(
-            "Procedure / Surgery",
-            "dischargeProcedure"
-        )}
-
-        ${area(
-            "Hospital Course",
-            "dischargeHospitalCourse"
-        )}
-
-        ${area(
-            "Condition at Discharge",
-            "conditionAtDischarge"
-        )}
-
-        ${area(
-            "Medicines",
-            "dischargeMedicines"
-        )}
-
-        ${area(
-            "Advice",
-            "dischargeAdvice"
-        )}
-
-        ${area(
-            "Follow-up",
-            "dischargeFollowup"
-        )}
-
-        ${area(
-            "Additional Notes",
-            "dischargeAdditionalNotes"
-        )}
-
-        ${paperFooter()}
-
-        <div class="record-navigation">
-
-            <button onclick="showPage('home')">
-                🏠 Home
-            </button>
-
-            <button onclick="saveCurrentForm()">
-                💾 Save Discharge
-            </button>
-
-            <button onclick="window.print()">
-                🖨 Print
-            </button>
-
-        </div>
-    `;
-
-    loadPatientFields();
-}
-
-/* ============================================================
-   BILLING ITEM LIST
-   ============================================================ */
-
-const BILLING_ITEMS = [
-
-    "Consultation",
-    "Registration",
-    "X-Ray",
-    "Blood Test",
-    "Laboratory",
-    "ECG",
-    "Procedure",
-    "Operation",
-    "Room Charges",
-    "Nursing Charges",
-    "Pharmacy",
-    "Injection",
-    "Dressing",
-    "Other Charges"
-
-];
-
-/* ============================================================
-   BILLING
-   ============================================================ */
-
-function showBilling() {
-
-    getApp();
-
-    const patient =
-        getPatient();
-
-    app.innerHTML = `
-
-        ${paperHeader(
-            "BILLING"
-        )}
-
-        <div class="billing-information">
-
-            ${field(
-                "Bill Date",
-                "billDate",
-                "date"
-            )}
-
-            ${field(
-                "Bill Number",
-                "billNumber"
-            )}
-
-        </div>
-
-        <div class="billing-table">
-
-            <div class="billing-row billing-heading">
-
-                <div>
-                    Item
-                </div>
-
-                <div>
-                    Qty
-                </div>
-
-                <div>
-                    Rate
-                </div>
-
-                <div>
-                    Amount
-                </div>
-
-            </div>
-
-            ${BILLING_ITEMS
-                .map(function (item, index) {
-
-                    return `
-
-                        <div
-                            class="billing-row"
-                        >
-
-                            <div>
-                                ${safe(item)}
-                            </div>
-
-                            <div>
-
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value="0"
-                                    class="bill-qty"
-                                    data-index="${index}"
-                                    oninput="calculateBill()"
-                                >
-
-                            </div>
-
-                            <div>
-
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value="0"
-                                    class="bill-rate"
-                                    data-index="${index}"
-                                    oninput="calculateBill()"
-                                >
-
-                            </div>
-
-                            <div>
-
-                                <input
-                                    type="number"
-                                    value="0"
-                                    class="bill-amount"
-                                    data-index="${index}"
-                                    readonly
-                                >
-
-                            </div>
+                            <small>
+                                Super Speciality Orthopaedic
+                                & Multispeciality Hospital
+                            </small>
 
                         </div>
 
-                    `;
+                    </div>
 
-                })
-                .join("")}
 
-        </div>
+                    <h2>
+                        ${escapeHTML(
+                            PATIENT_PAGES[page - 1]
+                        )}
+                    </h2>
 
-        <div class="billing-summary">
 
-            <label>
+                    <div class="ks-form-grid">
 
-                <span>
-                    Total
-                </span>
+                        ${content}
 
-                <input
-                    id="billTotal"
-                    value="0"
-                    readonly
-                >
+                    </div>
 
-            </label>
 
-            <label>
+                    <div class="ks-actions">
 
-                <span>
-                    Discount
-                </span>
+                        <button
+                            class="save"
+                            onclick="savePatientRecordPage(${page})">
 
-                <input
-                    id="billDiscount"
-                    type="number"
-                    value="0"
-                    oninput="calculateBill()"
-                >
+                            Save Patient Record
 
-            </label>
+                        </button>
 
-            <label>
 
-                <span>
-                    Paid
-                </span>
+                        <button
+                            onclick="printCurrentPage()">
 
-                <input
-                    id="billPaid"
-                    type="number"
-                    value="0"
-                    oninput="calculateBill()"
-                >
+                            Print
 
-            </label>
+                        </button>
 
-            <label>
+                    </div>
 
-                <span>
-                    Balance
-                </span>
+                </section>
 
-                <input
-                    id="billBalance"
-                    value="0"
-                    readonly
-                >
 
-            </label>
+                <div class="ks-pager">
 
-            <label>
+                    ${PATIENT_PAGES
+                        .map(
+                            (name, index) => `
 
-                <span>
-                    Payment Mode
-                </span>
+                                <button
+                                    class="${
+                                        index + 1 === page
+                                            ? "active"
+                                            : ""
+                                    }"
+                                    onclick="showPatientRecord(${
+                                        index + 1
+                                    })">
 
-                <select
-                    id="billPaymentMode"
-                >
+                                    ${index + 1}
 
-                    <option>
-                        Cash
-                    </option>
+                                </button>
 
-                    <option>
-                        UPI
-                    </option>
+                            `
+                        )
+                        .join("")}
 
-                    <option>
-                        Card
-                    </option>
+                </div>
 
-                    <option>
-                        Bank Transfer
-                    </option>
+            </main>
 
-                </select>
+        `;
 
-            </label>
+    }
 
-        </div>
+    window.showPatientRecord =
+        showPatientRecord;
 
-        ${area(
-            "Billing Notes",
-            "billingNotes"
-        )}
 
-        ${paperFooter()}
+    function savePatientRecordPage(page) {
 
-        <div class="record-navigation">
+        const values = {};
 
-            <button onclick="showPage('home')">
-                🏠 Home
-            </button>
 
-            <button onclick="saveBill()">
-                💾 Save Bill
-            </button>
+        document
+            .querySelectorAll(
+                "input, select, textarea"
+            )
+            .forEach(
+                element => {
 
-            <button onclick="window.print()">
-                🖨 Print
-            </button>
+                    if (
+                        element.id &&
+                        element.value.trim()
+                    ) {
 
-            <button onclick="billingAI()">
-                🤖 Billing AI
-            </button>
+                        values[element.id] =
+                            element.value;
 
-        </div>
-    `;
+                    }
 
-    loadPatientFields();
+                }
+            );
 
-    calculateBill();
-}
 
-/* ============================================================
-   BILL CALCULATION
-   ============================================================ */
+        const record = {
 
-function calculateBill() {
+            id:
+                state.currentPatientId ||
+                uid("PATIENT-RECORD"),
 
-    let total = 0;
+            page,
 
-    document
-        .querySelectorAll(".billing-row:not(.billing-heading)")
-        .forEach(function (row) {
+            pageName:
+                PATIENT_PAGES[page - 1],
 
-            const qtyElement =
-                row.querySelector(".bill-qty");
+            values,
 
-            const rateElement =
-                row.querySelector(".bill-rate");
+            savedAt:
+                new Date().toISOString()
 
-            const amountElement =
-                row.querySelector(".bill-amount");
+        };
 
-            if (
-                !qtyElement ||
-                !rateElement ||
-                !amountElement
-            ) {
-                return;
-            }
 
-            const qty =
-                Number(qtyElement.value) || 0;
+        const existing =
+            state.records.find(
+                item =>
+                    item.id === record.id &&
+                    item.page === page
+            );
 
-            const rate =
-                Number(rateElement.value) || 0;
 
-            const amount =
-                qty * rate;
+        if (existing) {
 
-            amountElement.value =
-                amount.toFixed(2);
+            Object.assign(
+                existing,
+                record
+            );
 
-            total += amount;
+        }
+
+        else {
+
+            state.records.push(record);
+
+        }
+
+
+        if (!state.currentPatientId) {
+
+            state.currentPatientId =
+                record.id;
+
+        }
+
+
+        saveState();
+
+
+        alert(
+            PATIENT_PAGES[page - 1] +
+            " saved successfully."
+        );
+
+    }
+
+    window.savePatientRecordPage =
+        savePatientRecordPage;
+
+
+    /* ========================================================
+       REGISTRATION
+       ======================================================== */
+
+    function showRegistration() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Patient Registration",
+                    "Create a new patient"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient Name",
+                            "rName"
+                        )}
+
+                        ${field(
+                            "Father / Husband Name",
+                            "rRelative"
+                        )}
+
+                        ${field(
+                            "Mobile",
+                            "rMobile"
+                        )}
+
+                        ${field(
+                            "Age",
+                            "rAge",
+                            "number"
+                        )}
+
+                        ${selectField(
+                            "Sex",
+                            "rSex",
+                            [
+                                "Male",
+                                "Female",
+                                "Other"
+                            ]
+                        )}
+
+                        ${field(
+                            "Date",
+                            "rDate",
+                            "date"
+                        )}
+
+                        ${field(
+                            "Address",
+                            "rAddress"
+                        )}
+
+                        ${field(
+                            "Consultant Doctor",
+                            "rDoctor"
+                        )}
+
+                        ${area(
+                            "Notes",
+                            "rNotes"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveRegistration()">
+
+                            Save Patient
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+
+    window.showRegistration =
+        showRegistration;
+
+
+    function saveRegistration() {
+
+        const name =
+            getValue("rName");
+
+        if (!name) {
+
+            alert(
+                "Please enter patient name."
+            );
+
+            return;
+
+        }
+
+
+        state.patientCounter++;
+
+
+        const patient = {
+
+            id: uid("PATIENT"),
+
+            uhid:
+                String(
+                    state.patientCounter
+                ).padStart(6, "0"),
+
+            name,
+
+            relative:
+                getValue("rRelative"),
+
+            mobile:
+                getValue("rMobile"),
+
+            age:
+                getValue("rAge"),
+
+            sex:
+                getValue("rSex"),
+
+            date:
+                getValue("rDate") ||
+                today(),
+
+            address:
+                getValue("rAddress"),
+
+            doctor:
+                getValue("rDoctor"),
+
+            notes:
+                getValue("rNotes"),
+
+            savedAt:
+                new Date().toISOString()
+
+        };
+
+
+        state.patients.push(patient);
+
+        state.currentPatientId =
+            patient.id;
+
+
+        saveState();
+
+
+        alert(
+            "Patient saved successfully.\n\nUHID: " +
+            patient.uhid
+        );
+
+    }
+
+    window.saveRegistration =
+        saveRegistration;
+
+
+    /* ========================================================
+       CONSULTATION
+       ======================================================== */
+
+    function showConsultation() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Consultation",
+                    "Clinical consultation"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "cUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "cName"
+                        )}
+
+                        ${field(
+                            "Doctor",
+                            "cDoctor"
+                        )}
+
+                        ${field(
+                            "Visit Date",
+                            "cDate",
+                            "date"
+                        )}
+
+                        ${area(
+                            "Chief Complaints",
+                            "cComplaints"
+                        )}
+
+                        ${area(
+                            "History",
+                            "cHistory"
+                        )}
+
+                        ${area(
+                            "Examination",
+                            "cExam"
+                        )}
+
+                        ${area(
+                            "Diagnosis",
+                            "cDiagnosis"
+                        )}
+
+                        ${area(
+                            "Treatment Plan",
+                            "cPlan"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveConsultation()">
+
+                            Save Consultation
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print Consultation
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+    window.showConsultation =
+        showConsultation;
+
+
+    function saveConsultation() {
+
+        state.consultations.push({
+
+            id: uid("CONSULT"),
+
+            uhid:
+                getValue("cUhid"),
+
+            patient:
+                getValue("cName"),
+
+            doctor:
+                getValue("cDoctor"),
+
+            date:
+                getValue("cDate") ||
+                today(),
+
+            complaints:
+                getValue("cComplaints"),
+
+            history:
+                getValue("cHistory"),
+
+            examination:
+                getValue("cExam"),
+
+            diagnosis:
+                getValue("cDiagnosis"),
+
+            treatment:
+                getValue("cPlan"),
+
+            savedAt:
+                new Date().toISOString()
 
         });
 
-    const discount =
-        Number(
-            document.getElementById(
-                "billDiscount"
-            )?.value
-        ) || 0;
 
-    const paid =
-        Number(
-            document.getElementById(
-                "billPaid"
-            )?.value
-        ) || 0;
+        saveState();
 
-    const finalTotal =
-        Math.max(
-            0,
-            total - discount
+
+        alert(
+            "Consultation saved successfully."
         );
-
-    const balance =
-        Math.max(
-            0,
-            finalTotal - paid
-        );
-
-    const totalElement =
-        document.getElementById(
-            "billTotal"
-        );
-
-    const balanceElement =
-        document.getElementById(
-            "billBalance"
-        );
-
-    if (totalElement) {
-
-        totalElement.value =
-            finalTotal.toFixed(2);
 
     }
 
-    if (balanceElement) {
+    window.saveConsultation =
+        saveConsultation;
 
-        balanceElement.value =
-            balance.toFixed(2);
+
+    /* ========================================================
+       INVESTIGATIONS
+       ======================================================== */
+
+    function showInvestigations() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "X-Ray / Blood / Investigations",
+                    "Enter investigation results"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "iUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "iName"
+                        )}
+
+                        ${field(
+                            "Date",
+                            "iDate",
+                            "date"
+                        )}
+
+                        ${field(
+                            "X-Ray",
+                            "iXray"
+                        )}
+
+                        ${area(
+                            "Blood Test",
+                            "iBlood"
+                        )}
+
+                        ${area(
+                            "Other Investigations",
+                            "iOther"
+                        )}
+
+                        ${area(
+                            "Impression",
+                            "iImpression"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveInvestigation()">
+
+                            Save Investigation
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
 
     }
-}
 
-/* ============================================================
-   SAVE BILL
-   ============================================================ */
+    window.showInvestigations =
+        showInvestigations;
 
-function saveBill() {
 
-    calculateBill();
+    function saveInvestigation() {
 
-    const bill = {
+        state.investigations.push({
 
-        patient:
-            getPatient(),
+            id: uid("INV"),
 
-        total:
+            uhid:
+                getValue("iUhid"),
+
+            patient:
+                getValue("iName"),
+
+            date:
+                getValue("iDate") ||
+                today(),
+
+            xray:
+                getValue("iXray"),
+
+            blood:
+                getValue("iBlood"),
+
+            other:
+                getValue("iOther"),
+
+            impression:
+                getValue("iImpression"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Investigation saved successfully."
+        );
+
+    }
+
+    window.saveInvestigation =
+        saveInvestigation;
+
+
+    /* ========================================================
+       PRESCRIPTION
+       ======================================================== */
+
+    function showPrescription() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Prescription / Pharmacy",
+                    "Medicines and instructions"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "xUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "xName"
+                        )}
+
+                        ${field(
+                            "Date",
+                            "xDate",
+                            "date"
+                        )}
+
+                        ${area(
+                            "Medicines",
+                            "xMedicines"
+                        )}
+
+                        ${area(
+                            "Dose / Frequency / Duration",
+                            "xDose"
+                        )}
+
+                        ${area(
+                            "Instructions",
+                            "xInstructions"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="savePrescription()">
+
+                            Save Prescription
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+    window.showPrescription =
+        showPrescription;
+
+
+    function savePrescription() {
+
+        state.prescriptions.push({
+
+            id: uid("RX"),
+
+            uhid:
+                getValue("xUhid"),
+
+            patient:
+                getValue("xName"),
+
+            date:
+                getValue("xDate") ||
+                today(),
+
+            medicines:
+                getValue("xMedicines"),
+
+            dose:
+                getValue("xDose"),
+
+            instructions:
+                getValue("xInstructions"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Prescription saved successfully."
+        );
+
+    }
+
+    window.savePrescription =
+        savePrescription;
+
+
+    /* ========================================================
+       ADMISSION
+       ======================================================== */
+
+    function showAdmission() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Admission & Treatment",
+                    "Admission, bed and treatment"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "aUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "aName"
+                        )}
+
+                        ${field(
+                            "Admission Date",
+                            "aDate",
+                            "date"
+                        )}
+
+                        ${selectField(
+                            "Area",
+                            "aArea",
+                            [
+                                "Ward",
+                                "Daycare",
+                                "ICU",
+                                "Casualty",
+                                "Special Room"
+                            ]
+                        )}
+
+                        ${field(
+                            "Bed Number",
+                            "aBed"
+                        )}
+
+                        ${field(
+                            "Doctor",
+                            "aDoctor"
+                        )}
+
+                        ${area(
+                            "Treatment / Procedures",
+                            "aTreatment"
+                        )}
+
+                        ${area(
+                            "Hospital Course",
+                            "aCourse"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveAdmission()">
+
+                            Save Admission
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+    window.showAdmission =
+        showAdmission;
+
+
+    function saveAdmission() {
+
+        state.admissions.push({
+
+            id: uid("ADM"),
+
+            uhid:
+                getValue("aUhid"),
+
+            patient:
+                getValue("aName"),
+
+            date:
+                getValue("aDate") ||
+                today(),
+
+            area:
+                getValue("aArea"),
+
+            bed:
+                getValue("aBed"),
+
+            doctor:
+                getValue("aDoctor"),
+
+            treatment:
+                getValue("aTreatment"),
+
+            course:
+                getValue("aCourse"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Admission and treatment saved."
+        );
+
+    }
+
+    window.saveAdmission =
+        saveAdmission;
+
+
+    /* ========================================================
+       FOLLOW-UP
+       ======================================================== */
+
+    function showFollowup() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Follow-up",
+                    "Review and next appointment"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "fUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "fName"
+                        )}
+
+                        ${field(
+                            "Review Date",
+                            "fDate",
+                            "date"
+                        )}
+
+                        ${field(
+                            "Doctor",
+                            "fDoctor"
+                        )}
+
+                        ${area(
+                            "Progress",
+                            "fProgress"
+                        )}
+
+                        ${area(
+                            "Medicines",
+                            "fMedicines"
+                        )}
+
+                        ${area(
+                            "Advice",
+                            "fAdvice"
+                        )}
+
+                        ${field(
+                            "Next Appointment",
+                            "fNext",
+                            "date"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveFollowup()">
+
+                            Save Follow-up
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+    window.showFollowup =
+        showFollowup;
+
+
+    function saveFollowup() {
+
+        state.followups.push({
+
+            id: uid("FOLLOWUP"),
+
+            uhid:
+                getValue("fUhid"),
+
+            patient:
+                getValue("fName"),
+
+            date:
+                getValue("fDate") ||
+                today(),
+
+            doctor:
+                getValue("fDoctor"),
+
+            progress:
+                getValue("fProgress"),
+
+            medicines:
+                getValue("fMedicines"),
+
+            advice:
+                getValue("fAdvice"),
+
+            next:
+                getValue("fNext"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Follow-up saved successfully."
+        );
+
+    }
+
+    window.saveFollowup =
+        saveFollowup;
+
+
+    /* ========================================================
+       DISCHARGE SUMMARY
+       ======================================================== */
+
+    function showDischarge() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Discharge Summary",
+                    "Complete and print the final summary"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-paper-head">
+
+                        <img
+                            src="image.png"
+                            alt="Hospital Logo">
+
+                        <div>
+
+                            <b>
+                                K. SUVIDHA HOSPITAL
+                            </b>
+
+                            <small>
+                                Discharge Summary
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient UHID",
+                            "dUhid"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "dName"
+                        )}
+
+                        ${field(
+                            "Discharge Date",
+                            "dDate",
+                            "date"
+                        )}
+
+                        ${field(
+                            "Doctor",
+                            "dDoctor"
+                        )}
+
+                        ${area(
+                            "Final Diagnosis",
+                            "dDiagnosis"
+                        )}
+
+                        ${area(
+                            "Treatment Given",
+                            "dTreatment"
+                        )}
+
+                        ${area(
+                            "Medicines at Discharge",
+                            "dMedicines"
+                        )}
+
+                        ${area(
+                            "Discharge Advice",
+                            "dAdvice"
+                        )}
+
+                        ${area(
+                            "Follow-up Advice",
+                            "dFollowup"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveDischarge()">
+
+                            Save Discharge Summary
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print Discharge Summary
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+    window.showDischarge =
+        showDischarge;
+
+
+    function saveDischarge() {
+
+        state.discharges.push({
+
+            id: uid("DISCHARGE"),
+
+            uhid:
+                getValue("dUhid"),
+
+            patient:
+                getValue("dName"),
+
+            date:
+                getValue("dDate") ||
+                today(),
+
+            doctor:
+                getValue("dDoctor"),
+
+            diagnosis:
+                getValue("dDiagnosis"),
+
+            treatment:
+                getValue("dTreatment"),
+
+            medicines:
+                getValue("dMedicines"),
+
+            advice:
+                getValue("dAdvice"),
+
+            followup:
+                getValue("dFollowup"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Discharge Summary saved successfully."
+        );
+
+    }
+
+    window.saveDischarge =
+        saveDischarge;
+
+
+    /* ========================================================
+       BILLING
+       ======================================================== */
+
+    const BILL_ITEMS = [
+
+        "Doctor Charges",
+        "Consultation",
+        "Investigation",
+        "Patient Registration",
+        "Follow Up",
+        "Discharge Summary",
+        "Ward Charges",
+        "Nursing Charges",
+        "ICU Charges",
+        "Daycare Charges",
+        "Casualty Charges",
+        "Special Room Charges",
+        "X-Ray",
+        "Blood Test",
+        "Pharmacy",
+        "Procedure Charges",
+        "Operation Theatre Charges",
+        "Room Charges",
+        "Medical Supplies",
+        "Other Hospital Charges"
+
+    ];
+
+
+    function showBilling() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "Billing",
+                    "Hospital billing"
+                )}
+
+                <section class="ks-paper">
+
+                    <div class="ks-bill-head">
+
+                        <input
+                            id="bUhid"
+                            placeholder="Patient UHID">
+
+                        <input
+                            id="bName"
+                            placeholder="Patient Name">
+
+                        <select id="bDoctor">
+
+                            <option value="">
+                                Doctor
+                            </option>
+
+                            ${state.doctors
+                                .map(
+                                    doctor =>
+                                        `<option>
+                                            ${escapeHTML(
+                                                doctor
+                                            )}
+                                        </option>`
+                                )
+                                .join("")}
+
+                        </select>
+
+                    </div>
+
+
+                    <table class="ks-bill">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Item
+                                </th>
+
+                                <th>
+                                    Qty
+                                </th>
+
+                                <th>
+                                    Rate
+                                </th>
+
+                                <th>
+                                    Amount
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            ${BILL_ITEMS
+                                .map(
+                                    (item, index) => `
+
+                                    <tr>
+
+                                        <td>
+                                            ${escapeHTML(
+                                                item
+                                            )}
+                                        </td>
+
+                                        <td>
+
+                                            <input
+                                                id="q${index}"
+                                                type="number"
+                                                min="0"
+                                                value="0"
+                                                oninput="calculateBill()">
+
+                                        </td>
+
+                                        <td>
+
+                                            <input
+                                                id="r${index}"
+                                                type="number"
+                                                min="0"
+                                                value="0"
+                                                oninput="calculateBill()">
+
+                                        </td>
+
+                                        <td id="amt${index}">
+                                            0.00
+                                        </td>
+
+                                    </tr>
+
+                                `
+                                )
+                                .join("")}
+
+                        </tbody>
+
+                    </table>
+
+
+                    <div class="ks-total">
+
+                        <label>
+                            Subtotal
+                            <input
+                                id="bSub"
+                                readonly>
+                        </label>
+
+                        <label>
+                            Discount
+                            <input
+                                id="bDiscount"
+                                type="number"
+                                value="0"
+                                oninput="calculateBill()">
+                        </label>
+
+                        <label>
+                            Paid
+                            <input
+                                id="bPaid"
+                                type="number"
+                                value="0"
+                                oninput="calculateBill()">
+                        </label>
+
+                        <label>
+                            Balance
+                            <input
+                                id="bBalance"
+                                readonly>
+                        </label>
+
+                    </div>
+
+
+                    <div class="ks-form-grid">
+
+                        ${selectField(
+                            "Payment Mode",
+                            "bMode",
+                            [
+                                "Cash",
+                                "Card",
+                                "UPI",
+                                "Insurance",
+                                "Other"
+                            ]
+                        )}
+
+                        ${area(
+                            "Notes",
+                            "bNotes"
+                        )}
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveBill()">
+
+                            Save Bill
+
+                        </button>
+
+
+                        <button
+                            onclick="billingAI()">
+
+                            Billing AI
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print Bill
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+
+        calculateBill();
+
+    }
+
+
+    window.showBilling =
+        showBilling;
+
+
+    function calculateBill() {
+
+        let subtotal = 0;
+
+
+        BILL_ITEMS.forEach(
+            function (_, index) {
+
+                const qty =
+                    Number(
+                        getValue(
+                            "q" + index
+                        )
+                    ) || 0;
+
+
+                const rate =
+                    Number(
+                        getValue(
+                            "r" + index
+                        )
+                    ) || 0;
+
+
+                const amount =
+                    qty * rate;
+
+
+                subtotal += amount;
+
+
+                const amountBox =
+                    document.getElementById(
+                        "amt" + index
+                    );
+
+
+                if (amountBox) {
+
+                    amountBox.textContent =
+                        amount.toFixed(2);
+
+                }
+
+            }
+        );
+
+
+        const discount =
+            Number(
+                getValue("bDiscount")
+            ) || 0;
+
+
+        const paid =
+            Number(
+                getValue("bPaid")
+            ) || 0;
+
+
+        const balance =
+            Math.max(
+                0,
+                subtotal -
+                discount -
+                paid
+            );
+
+
+        setValue(
+            "bSub",
+            subtotal.toFixed(2)
+        );
+
+
+        setValue(
+            "bBalance",
+            balance.toFixed(2)
+        );
+
+    }
+
+
+    window.calculateBill =
+        calculateBill;
+
+
+    function saveBill() {
+
+        calculateBill();
+
+
+        const items =
+            BILL_ITEMS
+                .map(
+                    function (name, index) {
+
+                        const qty =
+                            Number(
+                                getValue(
+                                    "q" + index
+                                )
+                            ) || 0;
+
+
+                        const rate =
+                            Number(
+                                getValue(
+                                    "r" + index
+                                )
+                            ) || 0;
+
+
+                        return {
+
+                            name,
+
+                            qty,
+
+                            rate,
+
+                            amount:
+                                qty * rate
+
+                        };
+
+                    }
+                )
+                .filter(
+                    item =>
+                        item.qty ||
+                        item.rate
+                );
+
+
+        state.bills.push({
+
+            id: uid("BILL"),
+
+            uhid:
+                getValue("bUhid"),
+
+            patient:
+                getValue("bName"),
+
+            doctor:
+                getValue("bDoctor"),
+
+            items,
+
+            subtotal:
+                Number(
+                    getValue("bSub")
+                ) || 0,
+
+            discount:
+                Number(
+                    getValue("bDiscount")
+                ) || 0,
+
+            paid:
+                Number(
+                    getValue("bPaid")
+                ) || 0,
+
+            balance:
+                Number(
+                    getValue("bBalance")
+                ) || 0,
+
+            paymentMode:
+                getValue("bMode"),
+
+            notes:
+                getValue("bNotes"),
+
+            savedAt:
+                new Date().toISOString()
+
+        });
+
+
+        saveState();
+
+
+        alert(
+            "Bill saved successfully."
+        );
+
+    }
+
+
+    window.saveBill =
+        saveBill;
+
+
+    function billingAI() {
+
+        calculateBill();
+
+
+        alert(
+
+            "Billing check\n\n" +
+
+            "Subtotal: ₹" +
+            getValue("bSub") +
+
+            "\nDiscount: ₹" +
+            getValue("bDiscount") +
+
+            "\nPaid: ₹" +
+            getValue("bPaid") +
+
+            "\nBalance: ₹" +
+            getValue("bBalance") +
+
+            "\n\nPlease review the bill before finalizing."
+
+        );
+
+    }
+
+
+    window.billingAI =
+        billingAI;
+
+
+    /* ========================================================
+       O.T. SLOT
+       ======================================================== */
+
+    function showOT() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                ${pageHeader(
+                    "O.T. SLOT",
+                    "Operation theatre booking"
+                )}
+
+
+                <section class="ks-paper">
+
+                    <h2>
+                        BOOK O.T.
+                    </h2>
+
+
+                    <div class="ks-form-grid">
+
+                        ${field(
+                            "Patient ID / UHID",
+                            "otPatientId"
+                        )}
+
+                        ${field(
+                            "Patient Name",
+                            "otPatientName"
+                        )}
+
+                        ${field(
+                            "Age",
+                            "otAge",
+                            "number"
+                        )}
+
+                        ${selectField(
+                            "Sex",
+                            "otSex",
+                            [
+                                "Male",
+                                "Female",
+                                "Other"
+                            ]
+                        )}
+
+
+                        <label class="ks-field">
+
+                            <span>
+                                Consultant Doctor
+                            </span>
+
+                            <select id="otDoctor">
+
+                                <option value="">
+                                    Select Doctor
+                                </option>
+
+                                ${state.doctors
+                                    .map(
+                                        doctor =>
+                                            `<option>
+                                                ${escapeHTML(
+                                                    doctor
+                                                )}
+                                            </option>`
+                                    )
+                                    .join("")}
+
+                            </select>
+
+                        </label>
+
+
+                        ${field(
+                            "Operation / Procedure",
+                            "otProcedure"
+                        )}
+
+                        ${field(
+                            "Surgeon",
+                            "otSurgeon"
+                        )}
+
+                        ${field(
+                            "Assistant Surgeon",
+                            "otAssistantSurgeon"
+                        )}
+
+                        ${field(
+                            "Anaesthesiologist",
+                            "otAnaesthesiologist"
+                        )}
+
+                        ${field(
+                            "O.T. Date",
+                            "otDate",
+                            "date"
+                        )}
+
+                        ${field(
+                            "Start Time",
+                            "otStartTime",
+                            "time"
+                        )}
+
+                        ${field(
+                            "End Time",
+                            "otEndTime",
+                            "time"
+                        )}
+
+                        ${area(
+                            "Remarks",
+                            "otRemarks"
+                        )}
+
+                    </div>
+
+
+                    <div class="ot-types">
+
+                        <h3>
+                            O.T. TYPE
+                        </h3>
+
+
+                        <button
+                            type="button"
+                            onclick="
+                                selectOTType(
+                                    'MODULAR O.T.'
+                                )
+                            ">
+
+                            MODULAR O.T.
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="
+                                selectOTType(
+                                    'GENERAL SURGERY O.T.'
+                                )
+                            ">
+
+                            GENERAL SURGERY O.T.
+
+                        </button>
+
+
+                        <div
+                            id="selectedOTDisplay">
+
+                            Please select O.T. type
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="ks-actions">
+
+                        <button
+                            class="save"
+                            onclick="saveOTBooking()">
+
+                            Save O.T. Booking
+
+                        </button>
+
+
+                        <button
+                            onclick="printCurrentPage()">
+
+                            Print O.T. Booking
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+    }
+
+
+    window.showOT =
+        showOT;
+
+
+    function selectOTType(type) {
+
+        state.selectedOT =
+            type;
+
+
+        const display =
             document.getElementById(
-                "billTotal"
-            )?.value || "0",
+                "selectedOTDisplay"
+            );
 
-        discount:
-            document.getElementById(
-                "billDiscount"
-            )?.value || "0",
 
-        paid:
-            document.getElementById(
-                "billPaid"
-            )?.value || "0",
+        if (display) {
 
-        balance:
-            document.getElementById(
-                "billBalance"
-            )?.value || "0",
+            display.textContent =
+                "Selected O.T.: " +
+                type;
 
-        paymentMode:
-            document.getElementById(
-                "billPaymentMode"
-            )?.value || "",
+        }
 
-        date:
-            new Date().toISOString()
+    }
+
+
+    window.selectOTType =
+        selectOTType;
+
+
+    function saveOTBooking() {
+
+        const booking = {
+
+            id: uid("OT"),
+
+            patientId:
+                getValue("otPatientId"),
+
+            patientName:
+                getValue("otPatientName"),
+
+            age:
+                getValue("otAge"),
+
+            sex:
+                getValue("otSex"),
+
+            doctor:
+                getValue("otDoctor"),
+
+            procedure:
+                getValue("otProcedure"),
+
+            surgeon:
+                getValue("otSurgeon"),
+
+            assistantSurgeon:
+                getValue(
+                    "otAssistantSurgeon"
+                ),
+
+            anaesthesiologist:
+                getValue(
+                    "otAnaesthesiologist"
+                ),
+
+            date:
+                getValue("otDate"),
+
+            startTime:
+                getValue("otStartTime"),
+
+            endTime:
+                getValue("otEndTime"),
+
+            remarks:
+                getValue("otRemarks"),
+
+            otType:
+                state.selectedOT || "",
+
+            savedAt:
+                new Date().toISOString()
+
+        };
+
+
+        if (
+            !booking.patientId &&
+            !booking.patientName
+        ) {
+
+            alert(
+                "Please enter Patient ID or Patient Name."
+            );
+
+            return;
+
+        }
+
+
+        if (!booking.otType) {
+
+            alert(
+                "Please select Modular O.T. or General Surgery O.T."
+            );
+
+            return;
+
+        }
+
+
+        state.otBookings.push(
+            booking
+        );
+
+
+        saveState();
+
+
+        alert(
+            "O.T. booking saved successfully."
+        );
+
+    }
+
+
+    window.saveOTBooking =
+        saveOTBooking;
+
+
+    /* ========================================================
+       BEDS
+       ======================================================== */
+
+    const BED_COUNTS = {
+
+        Ward: 4,
+
+        Daycare: 4,
+
+        ICU: 5,
+
+        Casualty: 4,
+
+        "Special Room": 8
 
     };
 
-    localStorage.setItem(
-        BILL_KEY,
-        JSON.stringify(bill)
-    );
 
-    saveCurrentForm();
+    function allBeds() {
 
-    alert(
-        "Bill saved successfully."
-    );
-}
+        const beds = [];
 
-/* ============================================================
-   BILLING AI
-   ============================================================ */
 
-function billingAI() {
+        Object.entries(
+            BED_COUNTS
+        ).forEach(
+            function ([area, count]) {
 
-    calculateBill();
+                for (
+                    let number = 1;
+                    number <= count;
+                    number++
+                ) {
 
-    const total =
-        document.getElementById(
-            "billTotal"
-        )?.value || "0";
+                    beds.push({
 
-    const paid =
-        document.getElementById(
-            "billPaid"
-        )?.value || "0";
+                        id:
+                            area
+                                .replace(
+                                    /\s/g,
+                                    "-"
+                                ) +
+                            "-" +
+                            number,
 
-    const balance =
-        document.getElementById(
-            "billBalance"
-        )?.value || "0";
+                        area,
 
-    alert(
+                        number
 
-        "SUVIDHA BILLING AI\n\n" +
+                    });
 
-        "Final Bill: ₹" +
-        total +
-        "\n\n" +
+                }
 
-        "Paid: ₹" +
-        paid +
-        "\n\n" +
+            }
+        );
 
-        "Balance: ₹" +
-        balance
-
-    );
-}
-
-/* ============================================================
-   CREATE 25 BEDS
-   ============================================================ */
-
-function createBeds() {
-
-    let beds = [];
-
-    try {
-
-        beds =
-            JSON.parse(
-                localStorage.getItem(BED_KEY) || "[]"
-            );
-
-    } catch (error) {
-
-        beds = [];
-
-    }
-
-    if (
-        Array.isArray(beds) &&
-        beds.length === TOTAL_BEDS
-    ) {
 
         return beds;
 
     }
 
-    beds = [];
 
-    /* WARD */
+    function showBeds() {
 
-    for (
-        let i = 1;
-        i <= 4;
-        i++
-    ) {
+        const savedBeds =
+            state.beds || [];
 
-        beds.push({
 
-            id:
-                "WARD-" +
-                String(i).padStart(2, "0"),
+        app.innerHTML = `
 
-            area:
-                "Ward",
+            <main class="ks-page">
 
-            occupied:
-                false,
+                ${pageHeader(
+                    "Beds",
+                    "25-bed occupancy management"
+                )}
 
-            patientName:
-                "",
 
-            uhid:
-                "",
+                <section class="ks-paper">
 
-            doctor:
-                ""
+                    <p>
 
-        });
+                        Total beds: 25
 
-    }
+                        <br>
 
-    /* DAYCARE */
+                        Ward: 4
 
-    for (
-        let i = 1;
-        i <= 4;
-        i++
-    ) {
+                        | Daycare: 4
 
-        beds.push({
+                        | ICU: 5
 
-            id:
-                "DAYCARE-" +
-                String(i).padStart(2, "0"),
+                        | Casualty: 4
 
-            area:
-                "Daycare",
+                        | Special Room: 8
 
-            occupied:
-                false,
+                    </p>
 
-            patientName:
-                "",
 
-            uhid:
-                "",
+                    <div class="bed-grid">
 
-            doctor:
-                ""
+                        ${allBeds()
+                            .map(
+                                function (bed) {
 
-        });
+                                    const saved =
+                                        savedBeds.find(
+                                            item =>
+                                                item.id ===
+                                                bed.id
+                                        ) || {};
 
-    }
 
-    /* ICU */
+                                    return `
 
-    for (
-        let i = 1;
-        i <= 5;
-        i++
-    ) {
+                                        <div
+                                            class="
+                                                bed-card
+                                                ${
+                                                    saved.occupied
+                                                        ? "occupied"
+                                                        : ""
+                                                }
+                                            ">
 
-        beds.push({
+                                            <b>
 
-            id:
-                "ICU-" +
-                String(i).padStart(2, "0"),
+                                                ${escapeHTML(
+                                                    bed.area
+                                                )}
+                                                ${bed.number}
 
-            area:
-                "ICU",
+                                            </b>
 
-            occupied:
-                false,
 
-            patientName:
-                "",
+                                            <span>
 
-            uhid:
-                "",
+                                                ${
+                                                    saved.occupied
+                                                        ? "Occupied"
+                                                        : "Available"
+                                                }
 
-            doctor:
-                ""
+                                            </span>
 
-        });
 
-    }
+                                            <input
+                                                id="
+                                                    bedPatient_${
+                                                        bed.id
+                                                    }
+                                                "
+                                                placeholder="
+                                                    Patient name
+                                                "
+                                                value="${
+                                                    escapeHTML(
+                                                        saved.patient ||
+                                                        ""
+                                                    )
+                                                }">
 
-    /* CASUALTY */
 
-    for (
-        let i = 1;
-        i <= 4;
-        i++
-    ) {
+                                            <input
+                                                id="
+                                                    bedUhid_${
+                                                        bed.id
+                                                    }
+                                                "
+                                                placeholder="
+                                                    UHID
+                                                "
+                                                value="${
+                                                    escapeHTML(
+                                                        saved.uhid ||
+                                                        ""
+                                                    )
+                                                }">
+
+
+                                            <button
+                                                onclick="
+                                                    saveBed(
+                                                        '${escapeHTML(
+                                                            bed.id
+                                                        )}',
+                                                        '${escapeHTML(
+                                                            bed.area
+                                                        )}',
+                                                        ${bed.number}
+                                                    )
+                                                ">
+
+                                                Save Bed
+
+                                            </button>
+
+                                        </div>
+
+                                    `;
 
-        beds.push({
-
-            id:
-                "CASUALTY-" +
-                String(i).padStart(2, "0"),
-
-            area:
-                "Casualty",
-
-            occupied:
-                false,
-
-            patientName:
-                "",
-
-            uhid:
-                "",
-
-            doctor:
-                ""
-
-        });
-
-    }
-
-    /* SPECIAL ROOMS */
-
-    for (
-        let i = 1;
-        i <= 8;
-        i++
-    ) {
-
-        beds.push({
-
-            id:
-                "SPECIAL-" +
-                String(i).padStart(2, "0"),
-
-            area:
-                "Special Room",
-
-            occupied:
-                false,
-
-            patientName:
-                "",
-
-            uhid:
-                "",
-
-            doctor:
-                ""
-
-        });
-
-    }
-
-    localStorage.setItem(
-        BED_KEY,
-        JSON.stringify(beds)
-    );
-
-    return beds;
-}
-
-/* ============================================================
-   SAVE BEDS
-   ============================================================ */
-
-function saveBeds(beds) {
-
-    localStorage.setItem(
-        BED_KEY,
-        JSON.stringify(beds)
-    );
-}
-
-/* ============================================================
-   BED MANAGEMENT
-   ============================================================ */
-
-function showBedManagement() {
-
-    getApp();
-
-    const beds =
-        createBeds();
-
-    const occupied =
-        beds.filter(
-            function (bed) {
-                return bed.occupied;
-            }
-        ).length;
-
-    const available =
-        TOTAL_BEDS - occupied;
-
-    app.innerHTML = `
-
-        <div class="hospital-dashboard">
-
-            <div class="dashboard-header">
-
-                <button
-                    onclick="showPage('home')"
-                >
-                    🏠 Home
-                </button>
-
-                <h1>
-                    🛏 BED MANAGEMENT
-                </h1>
-
-                <p>
-                    K. Suvidha Hospital -
-                    25 Bed Hospital
-                </p>
-
-            </div>
-
-            <div class="bed-summary">
-
-                <div class="bed-summary-card">
-
-                    <strong>
-                        25
-                    </strong>
-
-                    <span>
-                        Total Beds
-                    </span>
-
-                </div>
-
-                <div class="bed-summary-card">
-
-                    <strong>
-                        ${occupied}
-                    </strong>
-
-                    <span>
-                        Occupied
-                    </span>
-
-                </div>
-
-                <div class="bed-summary-card">
-
-                    <strong>
-                        ${available}
-                    </strong>
-
-                    <span>
-                        Available
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div class="bed-area-summary">
-
-                <div>
-                    🛏 Ward
-                    <strong>
-                        4 Beds
-                    </strong>
-                </div>
-
-                <div>
-                    🛏 Daycare
-                    <strong>
-                        4 Beds
-                    </strong>
-                </div>
-
-                <div>
-                    🏥 ICU
-                    <strong>
-                        5 Beds
-                    </strong>
-                </div>
-
-                <div>
-                    🚑 Casualty
-                    <strong>
-                        4 Beds
-                    </strong>
-                </div>
-
-                <div>
-                    🚪 Special Rooms
-                    <strong>
-                        8 Beds
-                    </strong>
-                </div>
-
-            </div>
-
-            <div class="bed-list">
-
-                ${beds
-                    .map(function (bed, index) {
-
-                        return `
-
-                            <div
-                                class="
-                                    bed-card
-                                    ${
-                                        bed.occupied
-                                            ? "bed-occupied"
-                                            : "bed-available"
-                                    }
-                                "
-                            >
-
-                                <div class="bed-title">
-
-                                    <strong>
-                                        ${safe(
-                                            bed.id
-                                        )}
-                                    </strong>
-
-                                    <span>
-                                        ${
-                                            bed.occupied
-                                                ? "OCCUPIED"
-                                                : "AVAILABLE"
-                                        }
-                                    </span>
-
-                                </div>
-
-                                <div class="bed-area">
-
-                                    Location:
-                                    ${safe(
-                                        bed.area
-                                    )}
-
-                                </div>
-
-                                ${
-                                    bed.occupied
-
-                                    ?
-
-                                    `
-
-                                    <div
-                                        class="bed-patient"
-                                    >
-
-                                        <strong>
-                                            Patient:
-                                        </strong>
-
-                                        ${safe(
-                                            bed.patientName
-                                        )}
-
-                                        <br>
-
-                                        <strong>
-                                            UHID/IP:
-                                        </strong>
-
-                                        ${safe(
-                                            bed.uhid
-                                        )}
-
-                                        <br>
-
-                                        <strong>
-                                            Doctor:
-                                        </strong>
-
-                                        ${safe(
-                                            bed.doctor
-                                        )}
-
-                                    </div>
-
-                                    <button
-                                        onclick="releaseBed(${index})"
-                                    >
-                                        Release Bed
-                                    </button>
-
-                                    `
-
-                                    :
-
-                                    `
-
-                                    <button
-                                        onclick="occupyBed(${index})"
-                                    >
-                                        Occupy Bed
-                                    </button>
-
-                                    `
                                 }
+                            )
+                            .join("")}
 
-                            </div>
+                    </div>
 
-                        `;
 
-                    })
-                    .join("")}
+                    <div class="ks-actions">
 
-            </div>
+                        <button
+                            onclick="printCurrentPage()">
 
-        </div>
-    `;
-}
+                            Print Beds
 
-/* ============================================================
-   OCCUPY BED
-   ============================================================ */
+                        </button>
 
-function occupyBed(index) {
+                    </div>
 
-    const beds =
-        createBeds();
+                </section>
 
-    const patient =
-        getPatient();
+            </main>
 
-    const patientName =
-        prompt(
-            "Enter Patient Name:",
-            patient.patientName || ""
-        );
+        `;
 
-    if (!patientName) {
-        return;
     }
 
-    const uhid =
-        prompt(
-            "Enter UHID / IP Number:",
-            patient.uhid || ""
-        );
 
-    const doctor =
-        prompt(
-            "Enter Doctor Name:",
-            patient.mainDoctor || ""
-        );
+    window.showBeds =
+        showBeds;
 
-    beds[index].occupied =
-        true;
 
-    beds[index].patientName =
-        patientName;
-
-    beds[index].uhid =
-        uhid || "";
-
-    beds[index].doctor =
-        doctor || "";
-
-    saveBeds(beds);
-
-    alert(
-        patientName +
-        " has been assigned to " +
-        beds[index].id +
-        " (" +
-        beds[index].area +
-        ")."
-    );
-
-    showBedManagement();
-}
-
-/* ============================================================
-   RELEASE BED
-   ============================================================ */
-
-function releaseBed(index) {
-
-    const beds =
-        createBeds();
-
-    if (
-        !confirm(
-            "Release this bed from the patient?"
-        )
+    function saveBed(
+        id,
+        area,
+        number
     ) {
-        return;
-    }
 
-    beds[index].occupied =
-        false;
-
-    beds[index].patientName =
-        "";
-
-    beds[index].uhid =
-        "";
-
-    beds[index].doctor =
-        "";
-
-    saveBeds(beds);
-
-    showBedManagement();
-}
-
-/* ============================================================
-   O.T SLOT STORAGE
-   ============================================================ */
-
-function getOTSlots() {
-
-    try {
-
-        const slots =
-            JSON.parse(
-                localStorage.getItem(OT_KEY) || "[]"
+        const patient =
+            getValue(
+                "bedPatient_" + id
             );
 
-        return Array.isArray(slots)
-            ? slots
-            : [];
 
-    } catch (error) {
+        const uhid =
+            getValue(
+                "bedUhid_" + id
+            );
 
-        return [];
+
+        let bed =
+            state.beds.find(
+                item =>
+                    item.id === id
+            );
+
+
+        if (!bed) {
+
+            bed = {
+
+                id,
+                area,
+                number
+
+            };
+
+            state.beds.push(
+                bed
+            );
+
+        }
+
+
+        bed.occupied =
+            !!(
+                patient ||
+                uhid
+            );
+
+
+        bed.patient =
+            patient;
+
+
+        bed.uhid =
+            uhid;
+
+
+        bed.savedAt =
+            new Date().toISOString();
+
+
+        saveState();
+
+
+        showBeds();
 
     }
-}
 
-function saveOTSlots(slots) {
 
-    localStorage.setItem(
-        OT_KEY,
-        JSON.stringify(slots)
-    );
-}
+    window.saveBed =
+        saveBed;
 
-/* ============================================================
-   O.T SLOT PAGE
-   ============================================================ */
 
-function showOTSlot() {
+    /* ========================================================
+       SAVED FILES
+       ======================================================== */
 
-    getApp();
+    function showSavedFiles() {
 
-    const slots =
-        getOTSlots();
+        const groups = [
 
-    const patient =
-        getPatient();
+            [
+                "Patients",
+                state.patients
+            ],
 
-    app.innerHTML = `
+            [
+                "Patient Records",
+                state.records
+            ],
 
-        <div class="hospital-dashboard">
+            [
+                "Consultations",
+                state.consultations
+            ],
 
-            <div class="dashboard-header">
+            [
+                "Investigations",
+                state.investigations
+            ],
 
-                <button
-                    onclick="showPage('home')"
-                >
-                    🏠 Home
-                </button>
+            [
+                "Prescriptions",
+                state.prescriptions
+            ],
 
-                <h1>
-                    🏥 O.T SLOT
-                </h1>
+            [
+                "Admissions",
+                state.admissions
+            ],
 
-                <p>
-                    Operation Theatre Slot Booking
-                </p>
+            [
+                "Follow-ups",
+                state.followups
+            ],
 
-            </div>
+            [
+                "Discharge Summaries",
+                state.discharges
+            ],
 
-            <div class="ot-booking-box">
+            [
+                "Beds",
+                state.beds
+            ],
 
-                <h2>
-                    Book O.T Slot
-                </h2>
+            [
+                "Bills",
+                state.bills
+            ],
 
-                <div class="paper-grid">
+            [
+                "O.T. Bookings",
+                state.otBookings
+            ]
 
-                    ${field(
-                        "Patient Name",
-                        "otPatient",
-                        "text",
-                        patient.patientName || ""
-                    )}
+        ];
 
-                    ${field(
-                        "UHID / IP Number",
-                        "otUHID",
-                        "text",
-                        patient.uhid || ""
-                    )}
 
-                    ${field(
-                        "Operation",
-                        "otOperation"
-                    )}
+        app.innerHTML = `
 
-                    <label
-                        class="paper-field"
-                    >
+            <main class="ks-page">
 
-                        <span>
-                            Surgeon
-                        </span>
+                ${pageHeader(
+                    "Saved Files",
+                    "Saved hospital work"
+                )}
 
-                        <select id="otSurgeon">
 
-                            <option value="">
-                                Select Surgeon
-                            </option>
-
-                            ${doctorOptions(
-                                patient.mainDoctor || ""
-                            )}
-
-                        </select>
-
-                    </label>
-
-                    ${field(
-                        "Date",
-                        "otDate",
-                        "date"
-                    )}
-
-                    ${field(
-                        "Start Time",
-                        "otStart",
-                        "time"
-                    )}
-
-                    ${field(
-                        "End Time",
-                        "otEnd",
-                        "time"
-                    )}
-
-                    <label
-                        class="paper-field"
-                    >
-
-                        <span>
-                            OT Status
-                        </span>
-
-                        <select id="otStatus">
-
-                            <option>
-                                Booked
-                            </option>
-
-                            <option>
-                                Scheduled
-                            </option>
-
-                            <option>
-                                Completed
-                            </option>
-
-                            <option>
-                                Cancelled
-                            </option>
-
-                        </select>
-
-                    </label>
-
-                </div>
-
-                <button
-                    class="primary-button"
-                    onclick="bookOTSlot()"
-                >
-                    🏥 BOOK O.T SLOT
-                </button>
-
-            </div>
-
-            <div class="ot-list">
-
-                <h2>
-                    O.T Schedule
-                </h2>
-
-                ${
-                    slots.length === 0
-
-                    ?
-
-                    `
-                    <p>
-                        No O.T slots booked.
-                    </p>
-                    `
-
-                    :
-
-                    slots
-                        .map(function (
-                            slot,
-                            index
-                        ) {
+                ${groups
+                    .map(
+                        function ([name, items]) {
 
                             return `
 
-                                <div
-                                    class="ot-card"
-                                >
+                                <section
+                                    class="saved-group">
 
-                                    <h3>
-                                        ${safe(
-                                            slot.operation
+                                    <h2>
+                                        ${escapeHTML(
+                                            name
                                         )}
-                                    </h3>
+                                    </h2>
 
-                                    <p>
-                                        <strong>
-                                            Patient:
-                                        </strong>
 
-                                        ${safe(
-                                            slot.patient
-                                        )}
-                                    </p>
+                                    ${
+                                        items.length
+                                            ?
 
-                                    <p>
-                                        <strong>
-                                            UHID/IP:
-                                        </strong>
+                                        items
+                                            .slice()
+                                            .reverse()
+                                            .map(
+                                                item => `
 
-                                        ${safe(
-                                            slot.uhid
-                                        )}
-                                    </p>
+                                                    <div
+                                                        class="
+                                                            saved-row
+                                                        ">
 
-                                    <p>
-                                        <strong>
-                                            Surgeon:
-                                        </strong>
+                                                        <div>
 
-                                        ${safe(
-                                            slot.surgeon
-                                        )}
-                                    </p>
+                                                            <b>
+                                                                ${escapeHTML(
+                                                                    item.name ||
+                                                                    item.patient ||
+                                                                    item.patientName ||
+                                                                    item.pageName ||
+                                                                    item.area ||
+                                                                    item.otType ||
+                                                                    name
+                                                                )}
+                                                            </b>
 
-                                    <p>
-                                        <strong>
-                                            Date:
-                                        </strong>
+                                                            <span>
 
-                                        ${safe(
-                                            slot.date
-                                        )}
-                                    </p>
+                                                                ${escapeHTML(
+                                                                    item.uhid ||
+                                                                    item.patientId ||
+                                                                    item.savedAt ||
+                                                                    ""
+                                                                )}
 
-                                    <p>
-                                        <strong>
-                                            Time:
-                                        </strong>
+                                                            </span>
 
-                                        ${safe(
-                                            slot.start
-                                        )}
-                                        -
-                                        ${safe(
-                                            slot.end
-                                        )}
-                                    </p>
+                                                        </div>
 
-                                    <p>
-                                        <strong>
-                                            Status:
-                                        </strong>
 
-                                        ${safe(
-                                            slot.status
-                                        )}
-                                    </p>
+                                                        <button
+                                                            onclick="
+                                                                viewSaved(
+                                                                    '${escapeHTML(
+                                                                        name
+                                                                    )}',
+                                                                    '${escapeHTML(
+                                                                        item.id ||
+                                                                        ""
+                                                                    )}'
+                                                                )
+                                                            ">
 
-                                    <button
-                                        onclick="deleteOTSlot(${index})"
-                                    >
-                                        Cancel O.T Slot
-                                    </button>
+                                                            Open
 
-                                </div>
+                                                        </button>
+
+                                                    </div>
+
+                                                `
+                                            )
+                                            .join("")
+
+                                            :
+
+                                        "<p>No saved files yet.</p>"
+                                    }
+
+                                </section>
 
                             `;
 
-                        })
-                        .join("")
-                }
+                        }
+                    )
+                    .join("")}
 
-            </div>
+            </main>
 
-        </div>
-<div class="ot-type-bottom">
+        `;
 
-    <h3>O.T. TYPE</h3>
+    }
 
-    <div class="ot-type-options">
 
-        <button type="button"
-                class="ot-type-button"
-                onclick="selectOTType('MODULAR O.T.')">
-            MODULAR O.T.
-        </button>
+    window.showSavedFiles =
+        showSavedFiles;
 
-        <button type="button"
-                class="ot-type-button"
-                onclick="selectOTType('GENERAL SURGERY O.T.')">
-            GENERAL SURGERY O.T.
-        </button>
 
-    </div>
-
-    <input type="hidden"
-           id="selectedOTType"
-           value="">
-
-    <div id="selectedOTDisplay" class="selected-ot-display">
-        Please select O.T. type
-    </div>
-
-</div>
-}
-
-/* ============================================================
-   BOOK O.T SLOT
-   ============================================================ */
-
-function bookOTSlot() {
-
-    const patient =
-        document
-            .getElementById(
-                "otPatient"
-            )
-            ?.value
-            .trim();
-
-    const uhid =
-        document
-            .getElementById(
-                "otUHID"
-            )
-            ?.value
-            .trim();
-
-    const operation =
-        document
-            .getElementById(
-                "otOperation"
-            )
-            ?.value
-            .trim();
-
-    const surgeon =
-        document
-            .getElementById(
-                "otSurgeon"
-            )
-            ?.value;
-
-    const date =
-        document
-            .getElementById(
-                "otDate"
-            )
-            ?.value;
-
-    const start =
-        document
-            .getElementById(
-                "otStart"
-            )
-            ?.value;
-
-    const end =
-        document
-            .getElementById(
-                "otEnd"
-            )
-            ?.value;
-
-    const status =
-        document
-            .getElementById(
-                "otStatus"
-            )
-            ?.value;
-
-    if (
-        !patient ||
-        !operation ||
-        !date ||
-        !start ||
-        !end
+    function viewSaved(
+        group,
+        id
     ) {
 
-        alert(
-            "Please enter Patient, Operation, Date, Start Time and End Time."
-        );
+        const map = {
 
-        return;
-    }
+            "Patients":
+                state.patients,
 
-    if (end <= start) {
+            "Patient Records":
+                state.records,
 
-        alert(
-            "End time must be later than start time."
-        );
+            "Consultations":
+                state.consultations,
 
-        return;
-    }
+            "Investigations":
+                state.investigations,
 
-    const slots =
-        getOTSlots();
+            "Prescriptions":
+                state.prescriptions,
 
-    const conflict =
-        slots.some(function (slot) {
+            "Admissions":
+                state.admissions,
 
-            if (
-                slot.date !== date ||
-                slot.status === "Cancelled"
-            ) {
+            "Follow-ups":
+                state.followups,
 
-                return false;
+            "Discharge Summaries":
+                state.discharges,
 
-            }
+            "Beds":
+                state.beds,
 
-            return (
-                start < slot.end &&
-                end > slot.start
+            "Bills":
+                state.bills,
+
+            "O.T. Bookings":
+                state.otBookings
+
+        };
+
+
+        const list =
+            map[group] || [];
+
+
+        const item =
+            list.find(
+                x =>
+                    x.id === id
             );
 
-        });
 
-    if (conflict) {
+        if (!item) {
 
-        alert(
-            "This O.T time overlaps with an existing O.T booking."
-        );
+            alert(
+                "Saved file not found."
+            );
 
-        return;
-    }
+            return;
 
-    slots.push({
+        }
 
-        patient:
-            patient,
 
-        uhid:
-            uhid || "",
+        app.innerHTML = `
 
-        operation:
-            operation,
+            <main class="ks-page">
 
-        surgeon:
-            surgeon || "",
+                ${pageHeader(
+                    "Saved File",
+                    group
+                )}
 
-        date:
-            date,
 
-        start:
-            start,
+                <section class="ks-paper">
 
-        end:
-            end,
+                    <pre class="saved-pre">${escapeHTML(
+                        JSON.stringify(
+                            item,
+                            null,
+                            2
+                        )
+                    )}</pre>
 
-        status:
-            status || "Booked"
 
-    });
+                    <div class="ks-actions">
 
-    saveOTSlots(slots);
+                        <button
+                            onclick="printCurrentPage()">
 
-    alert(
-        "O.T slot booked successfully."
-    );
+                            Print
 
-    showOTSlot();
-}
+                        </button>
 
-/* ============================================================
-   DELETE O.T SLOT
-   ============================================================ */
 
-function deleteOTSlot(index) {
+                        <button
+                            onclick="showSavedFiles()">
 
-    const slots =
-        getOTSlots();
+                            Back to Saved Files
 
-    if (
-        !confirm(
-            "Cancel this O.T slot?"
-        )
-    ) {
-        return;
-    }
+                        </button>
 
-    slots[index].status =
-        "Cancelled";
-
-    saveOTSlots(slots);
-
-    showOTSlot();
-}
-
-/* ============================================================
-   SUVIDHA AI KNOWLEDGE
-   ============================================================ */
-
-const SUVIDHA_KNOWLEDGE = {
-
-    identity:
-        "I am SUVIDHA AI, the programmed hospital assistant for K. Suvidha Hospital.",
-
-    selfAwareness:
-        "My self-awareness is a programmed software self-model. I can keep track of the hospital modules, bed information, O.T slots and patient workflow, but I am not a conscious human being.",
-
-    hospital:
-        "K. Suvidha Hospital is configured as a 25-bed hospital.",
-
-    beds:
-        "The hospital has 25 beds in total: 4 Ward beds, 4 Daycare beds, 5 ICU beds, 4 Casualty beds and 8 Special Room beds.",
-
-    ward:
-        "There are 4 Ward beds.",
-
-    daycare:
-        "There are 4 Daycare beds.",
-
-    icu:
-        "There are 5 ICU beds.",
-
-    casualty:
-        "There are 4 Casualty beds.",
-
-    specialRoom:
-        "There are 8 Special Room beds.",
-
-    ot:
-        "The O.T SLOT section is used to book operation theatre time. It stores patient name, UHID/IP number, operation, surgeon, date, start time, end time and status.",
-
-    receptionist:
-        "SUVIDHA AI is designed to assist the receptionist with patient registration, patient records, bed status, patient location, O.T slots, billing, discharge summaries and hospital navigation.",
-
-    patientRecord:
-        "PATIENTS RECORD combines the patient's Front Page, Registration, Consultation, X-Ray/Blood/Investigations, Prescription/Pharmacy, Admission & Treatment, Billing, Follow-up and Discharge Summary.",
-
-    billing:
-        "Billing provides fixed hospital billing items. The receptionist enters quantity and rate and the amount is calculated automatically.",
-
-    doctors:
-        "The hospital software has a shared doctor database. Doctors added to the database can be used in doctor selection fields."
-
-};
-
-/* ============================================================
-   CURRENT BED STATUS FOR SUVIDHA
-   ============================================================ */
-
-function getBedStatusForAI() {
-
-    const beds =
-        createBeds();
-
-    const occupied =
-        beds.filter(function (bed) {
-
-            return bed.occupied;
-
-        });
-
-    let answer =
-
-        "CURRENT BED STATUS\n\n" +
-
-        "Total Beds: 25\n" +
-
-        "Occupied: " +
-        occupied.length +
-        "\n" +
-
-        "Available: " +
-        (25 - occupied.length) +
-        "\n\n" +
-
-        "Ward: 4 beds\n" +
-
-        "Daycare: 4 beds\n" +
-
-        "ICU: 5 beds\n" +
-
-        "Casualty: 4 beds\n" +
-
-        "Special Rooms: 8 beds\n";
-
-    if (
-        occupied.length > 0
-    ) {
-
-        answer +=
-            "\nOCCUPIED PATIENTS:\n\n";
-
-        occupied.forEach(
-            function (bed) {
-
-                answer +=
-
-                    bed.id +
-                    "\nPatient: " +
-                    bed.patientName +
-                    "\nUHID/IP: " +
-                    bed.uhid +
-                    "\nDoctor: " +
-                    bed.doctor +
-                    "\nLocation: " +
-                    bed.area +
-                    "\n\n";
-
-            }
-        );
-
-    } else {
-
-        answer +=
-            "\nNo beds are currently marked occupied.";
-
-    }
-
-    return answer;
-}
-
-/* ============================================================
-   SUVIDHA AI PAGE
-   ============================================================ */
-
-function showSuvidha() {
-
-          app.innerHTML = `
-        <div class="suvidha-chat-page">
-
-            <div class="suvidha-chat-header">
-
-                <div class="suvidha-chat-title">
-
-                    <div class="suvidha-ai-icon">
-                        🤖
                     </div>
 
-                    <div>
-                        <h2>SUVIDHA AI</h2>
-                        <span>K. Suvidha Hospital Assistant</span>
-                    </div>
+                </section>
 
-                </div>
+            </main>
 
-                <button
-                    class="suvidha-back-button"
-                    onclick="showPage('home')">
-                    🏠 Home
-                </button>
+        `;
 
-            </div>
+    }
 
 
-            <div class="suvidha-chat-container">
+    window.viewSaved =
+        viewSaved;
 
-                <div
-                    id="suvidhaMessages"
-                    class="suvidha-messages">
 
-                    <div class="suvidha-message ai">
+    /* ========================================================
+       SUVIDHA AI
+       ======================================================== */
 
-                        <div class="suvidha-message-bubble">
+    let lastAIAnswer = "";
 
-                            👋 <strong>Hello!</strong><br><br>
 
-                            I am <strong>SUVIDHA AI</strong>, the
-                            hospital reception assistant.
+    function suvidhaAnswer(question) {
 
-                            <br><br>
+        const q =
+            String(question || "")
+                .trim();
 
-                            You can ask me about:
 
-                            <br>
-                            🛏️ Beds<br>
-                            🏥 Patients<br>
-                            🩺 Doctors<br>
-                            💳 Billing<br>
-                            🏨 Hospital information<br>
-                            🏗️ O.T. slots
+        const lower =
+            q.toLowerCase();
+
+
+        if (!q) {
+
+            return (
+                "Please type your question and I will help you."
+            );
+
+        }
+
+
+        if (
+            /^(hi|hello|hey)\b/i.test(q)
+        ) {
+
+            return (
+                "Hello. I am SUVIDHA. " +
+                "What can I help you with?"
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "how the hospital works"
+            ) ||
+            lower.includes(
+                "hospital workflow"
+            ) ||
+            lower.includes(
+                "step by step"
+            )
+        ) {
+
+            return (
+
+                "1. Patient Registration: enter the patient's basic details and save the patient.\n\n" +
+
+                "2. Patients Record: open the complete patient file and continue the same patient's information.\n\n" +
+
+                "3. Consultation: enter complaints, history, examination, diagnosis and treatment planning.\n\n" +
+
+                "4. Investigations: enter X-Ray, blood tests and other investigation results.\n\n" +
+
+                "5. Prescription and Pharmacy: enter medicines, dose, frequency, duration and instructions.\n\n" +
+
+                "6. Admission and Treatment: enter the ward or room, bed, doctor, procedures and treatment details.\n\n" +
+
+                "7. Billing: enter quantity and rate for the fixed hospital billing items. The system calculates amounts, discount, paid amount and balance.\n\n" +
+
+                "8. Follow-up: enter review date, progress, advice and next appointment.\n\n" +
+
+                "9. Discharge Summary: enter final diagnosis, treatment, medicines, advice and follow-up information, then save and print the summary.\n\n" +
+
+                "10. Saved Files: open Saved Files to see the work that has been saved."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes("bed")
+        ) {
+
+            return (
+
+                "K. Suvidha Hospital has 25 beds.\n\n" +
+
+                "Ward: 4 beds\n" +
+
+                "Daycare: 4 beds\n" +
+
+                "ICU: 5 beds\n" +
+
+                "Casualty: 4 beds\n" +
+
+                "Special Room: 8 beds\n\n" +
+
+                "Open Beds to mark a bed occupied. Enter the patient name and UHID and select Save Bed. The saved bed information is available in Saved Files."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes("ot") ||
+            lower.includes(
+                "operation theatre"
+            ) ||
+            lower.includes(
+                "operation theater"
+            )
+        ) {
+
+            return (
+
+                "Open O.T. SLOT.\n\n" +
+
+                "Enter the patient ID or UHID.\n\n" +
+
+                "Enter the patient name, age and sex.\n\n" +
+
+                "Select the consultant doctor.\n\n" +
+
+                "Enter the operation or procedure.\n\n" +
+
+                "Enter the surgeon.\n\n" +
+
+                "Enter the assistant surgeon.\n\n" +
+
+                "Enter the anaesthesiologist.\n\n" +
+
+                "Enter the O.T. date and start and end time.\n\n" +
+
+                "Select either Modular O.T. or General Surgery O.T.\n\n" +
+
+                "Save the O.T. booking and print it if required."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "registration"
+            )
+        ) {
+
+            return (
+
+                "To register a patient:\n\n" +
+
+                "1. Open Patient Registration.\n\n" +
+
+                "2. Enter the patient's name and basic information.\n\n" +
+
+                "3. Enter the mobile number, age, sex and address.\n\n" +
+
+                "4. Enter the consultant doctor if available.\n\n" +
+
+                "5. Select Save Patient.\n\n" +
+
+                "6. The system creates a six-digit UHID such as 000001, 000002 and so on."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "patient record"
+            ) ||
+            lower.includes(
+                "patients record"
+            )
+        ) {
+
+            return (
+
+                "Patients Record contains the complete patient workflow.\n\n" +
+
+                "1. Front Page\n" +
+
+                "2. Registration\n" +
+
+                "3. Consultation\n" +
+
+                "4. X-Ray / Blood / Investigations\n" +
+
+                "5. Prescription / Pharmacy\n" +
+
+                "6. Admission & Treatment\n" +
+
+                "7. Billing\n" +
+
+                "8. Follow-up\n" +
+
+                "9. Discharge Summary\n\n" +
+
+                "Save each section when the information has been entered. Use Print when a paper copy is required."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "billing"
+            )
+        ) {
+
+            return (
+
+                "To use Billing:\n\n" +
+
+                "1. Open Billing.\n\n" +
+
+                "2. Enter the patient UHID and patient name.\n\n" +
+
+                "3. Select the doctor.\n\n" +
+
+                "4. The billing item names are fixed.\n\n" +
+
+                "5. Enter quantity and rate.\n\n" +
+
+                "6. The system calculates the amount automatically.\n\n" +
+
+                "7. Enter discount and paid amount.\n\n" +
+
+                "8. Select the payment mode.\n\n" +
+
+                "9. Save the bill.\n\n" +
+
+                "10. Print the bill if required."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "discharge"
+            )
+        ) {
+
+            return (
+
+                "To prepare a Discharge Summary:\n\n" +
+
+                "1. Enter the patient UHID.\n\n" +
+
+                "2. Enter the patient name.\n\n" +
+
+                "3. Enter the discharge date and doctor.\n\n" +
+
+                "4. Enter the final diagnosis.\n\n" +
+
+                "5. Enter the treatment given.\n\n" +
+
+                "6. Enter medicines at discharge.\n\n" +
+
+                "7. Enter discharge advice.\n\n" +
+
+                "8. Enter follow-up advice.\n\n" +
+
+                "9. Save the Discharge Summary.\n\n" +
+
+                "10. Print the final summary."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "saved files"
+            ) ||
+            lower.includes(
+                "saved work"
+            )
+        ) {
+
+            return (
+
+                "Open Saved Files.\n\n" +
+
+                "Saved Files contains Patients, Patient Records, Consultations, Investigations, Prescriptions, Admissions, Follow-ups, Discharge Summaries, Beds, Bills and O.T. Bookings."
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "doctor"
+            )
+        ) {
+
+            return (
+
+                "The hospital doctor list includes:\n\n" +
+
+                DEFAULT_DOCTORS.join("\n")
+
+            );
+
+        }
+
+
+        if (
+            lower.includes(
+                "who are you"
+            ) ||
+            lower.includes(
+                "your name"
+            )
+        ) {
+
+            return (
+
+                "I am SUVIDHA, the digital hospital software assistant for K. Suvidha Hospital. I help staff understand the hospital software and its workflow."
+
+            );
+
+        }
+
+
+        return (
+
+            "I can help you with Patient Registration, Patients Record, Consultation, Investigations, Prescription, Admission and Treatment, Billing, Follow-up, Discharge Summary, Beds, O.T. SLOT and Saved Files.\n\n" +
+
+            "Tell me what you want to do and I will explain it step by step."
+
+        );
+
+    }
+
+
+    function showSuvidha() {
+
+        app.innerHTML = `
+
+            <main class="ks-page">
+
+                <section class="suvidha-master">
+
+                    <header>
+
+                        <img
+                            src="image.png"
+                            alt="Hospital Logo">
+
+                        <div>
+
+                            <h1>
+                                SUVIDHA AI
+                            </h1>
+
+                            <p>
+                                K. Suvidha Hospital Assistant
+                            </p>
 
                         </div>
 
-                    </div>
-
-                </div>
+                    </header>
 
 
-                <div class="suvidha-chat-input-area">
-
-                    <div class="suvidha-quick-actions">
-
-                        <button onclick="suvidhaQuick('Show bed status')">
-                            🛏️ Beds
-                        </button>
-
-                        <button onclick="suvidhaQuick('Show O.T. slots')">
-                            🏗️ O.T.
-                        </button>
-
-                        <button onclick="suvidhaQuick('Show patient records')">
-                            📁 Patients
-                        </button>
-
-                        <button onclick="suvidhaQuick('Help with billing')">
-                            💳 Billing
-                        </button>
-
+                    <div
+                        id="suvidhaChat"
+                        class="suvidha-chat">
                     </div>
 
 
-                    <div class="suvidha-chat-input-row">
+                    <div class="suvidha-input">
 
-                        <textarea
+                        <input
                             id="suvidhaInput"
-                            class="suvidha-chat-input"
-                            placeholder="Message SUVIDHA AI..."
-                            onkeydown="suvidhaEnter(event)">
-                        </textarea>
+                            type="text"
+                            placeholder="
+                                Ask SUVIDHA how the
+                                hospital software works
+                            ">
+
 
                         <button
-                            class="suvidha-mic-button"
-                            onclick="startSuvidhaVoice()"
-                            title="Voice input">
-                            🎤
+                            onclick="suvidhaAsk()">
+
+                            Send
+
                         </button>
 
+
                         <button
-                            class="suvidha-send-button"
-                            onclick="sendSuvidhaMessage()"
-                            title="Send">
-                            ➤
+                            onclick="suvidhaVoiceInput()">
+
+                            Mic
+
+                        </button>
+
+
+                        <button
+                            onclick="suvidhaSpeakLast()">
+
+                            Speak
+
                         </button>
 
                     </div>
 
-                </div>
 
-            </div>
+                    <div class="suvidha-quick">
 
-        </div>
-    `;
-}function suvidhaEnter(event) {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'Explain step by step how the hospital works'
+                                )
+                            ">
 
-    if (event.key === "Enter" && !event.shiftKey) {
+                            How the hospital works
 
-        event.preventDefault();
-
-        sendSuvidhaMessage();
-    }
-}
+                        </button>
 
 
-function sendSuvidhaMessage() {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'How do I register a patient step by step?'
+                                )
+                            ">
 
-    const input = document.getElementById("suvidhaInput");
+                            Registration
 
-    if (!input) return;
-
-    const message = input.value.trim();
-
-    if (!message) return;
-
-    addSuvidhaMessage(message, "user");
-
-    input.value = "";
-
-    setTimeout(function () {
-
-        const reply = getSuvidhaReply(message);
-
-        addSuvidhaMessage(reply, "ai");
-
-    }, 300);
-}
+                        </button>
 
 
-function addSuvidhaMessage(message, type) {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'How do I use Patients Record step by step?'
+                                )
+                            ">
 
-    const messages = document.getElementById("suvidhaMessages");
+                            Patients Record
 
-    if (!messages) return;
-
-    const div = document.createElement("div");
-
-    div.className = "suvidha-message " + type;
-
-    div.innerHTML = `
-        <div class="suvidha-message-bubble">
-            ${escapeSuvidha(message)}
-        </div>
-    `;
-
-    messages.appendChild(div);
-
-    messages.scrollTop = messages.scrollHeight;
-}
+                        </button>
 
 
-function suvidhaQuick(message) {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'How do I book O.T. step by step?'
+                                )
+                            ">
 
-    const input = document.getElementById("suvidhaInput");
+                            O.T.
 
-    if (!input) return;
-
-    input.value = message;
-
-    sendSuvidhaMessage();
-}
-
-
-function escapeSuvidha(text) {
-
-    const div = document.createElement("div");
-
-    div.textContent = text;
-
-    return div.innerHTML;
-}
+                        </button>
 
 
-function getSuvidhaReply(message) {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'How does billing work step by step?'
+                                )
+                            ">
 
-    const text = message.trim();
-    const lower = text.toLowerCase();
+                            Billing
 
-    /* ==========================================
-       REMEMBER USER NAME
-       ========================================== */
+                        </button>
 
-    const nameMatch = text.match(
-        /(?:my name is|i am|i'm|call me)\s+([a-zA-Z][a-zA-Z .'-]{1,40})/i
-    );
 
-    if (nameMatch) {
+                        <button
+                            onclick="
+                                suvidhaQuick(
+                                    'How do I prepare a discharge summary step by step?'
+                                )
+                            ">
 
-        const name = nameMatch[1]
-            .trim()
-            .replace(/\s+/g, " ");
+                            Discharge
 
-        localStorage.setItem(
-            "suvidhaUserName",
-            name
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        `;
+
+
+        addSuvidhaMessage(
+            "Hello. I am SUVIDHA. Tell me what you want to do and I will explain it step by step.",
+            "ai"
         );
 
-        return `
-            👋 Hello <strong>${escapeSuvidha(name)}</strong>!
 
-            <br><br>
+        const input =
+            document.getElementById(
+                "suvidhaInput"
+            );
 
-            I will remember your name on this device.
 
-            <br><br>
+        if (input) {
 
-            <strong>What help can I do for you?</strong>
+            input.addEventListener(
+                "keydown",
+                function (event) {
 
-            <br><br>
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
 
-            🏥 Hospital Information<br>
-            🛏️ Bed Management<br>
-            🩺 Doctor Information<br>
-            📁 Patient Records<br>
-            💳 Billing<br>
-            🏗️ O.T. Slots<br>
-            📄 Discharge Summary
-        `;
+                        suvidhaAsk();
+
+                    }
+
+                }
+            );
+
+        }
+
     }
 
 
-    /* ==========================================
-       GET SAVED NAME
-       ========================================== */
-
-    const savedName =
-        localStorage.getItem("suvidhaUserName");
-
-    const helloName = savedName
-        ? escapeSuvidha(savedName)
-        : "there";
+    window.showSuvidha =
+        showSuvidha;
 
 
-    /* ==========================================
-       GREETING
-       ========================================== */
-
-    if (
-        lower === "hi" ||
-        lower === "hello" ||
-        lower === "hey" ||
-        lower.includes("good morning") ||
-        lower.includes("good afternoon") ||
-        lower.includes("good evening")
+    function addSuvidhaMessage(
+        text,
+        type
     ) {
 
-        return `
-            👋 Hello <strong>${helloName}</strong>!
+        const chat =
+            document.getElementById(
+                "suvidhaChat"
+            );
 
-            <br><br>
 
-            I am <strong>SUVIDHA AI</strong>,
-            your K. Suvidha Hospital assistant.
+        if (!chat) {
+            return;
+        }
 
-            <br><br>
 
-            <strong>What help can I do for you?</strong>
+        const message =
+            document.createElement(
+                "div"
+            );
 
-            <br><br>
 
-            You can ask me a question or choose a topic:
-            <br><br>
+        message.className =
+            type === "ai"
+                ? "suvidha-ai"
+                : "suvidha-user";
 
-            🩺 How to add doctor information?<br>
-            🛏️ How to update bed status?<br>
-            📁 How to create a patient record?<br>
-            💳 How to make a bill?<br>
-            🏗️ How to book an O.T. slot?<br>
-            📄 How to prepare a discharge summary?
-        `;
-    }
 
+        /*
+           IMPORTANT:
 
-    /* ==========================================
-       ADD DOCTOR
-       ========================================== */
+           textContent is used here.
 
-    if (
-        lower.includes("add doctor") ||
-        lower.includes("add a doctor") ||
-        lower.includes("doctor information") ||
-        lower.includes("how to add doctor")
-    ) {
+           Therefore SUVIDHA will show:
 
-        return `
-            🩺 <strong>How to Add Doctor Information</strong>
+           <br>
 
-            <br><br>
+           or
 
-            Follow these steps:
+           <strong>
 
-            <br><br>
+           as normal text only if somebody actually types
+           those characters.
 
-            <strong>Step 1:</strong><br>
-            Open the <strong>Doctor Information</strong>
-            section.
+           The program itself does NOT insert those tags.
+        */
 
-            <br><br>
+        message.textContent =
+            String(text);
 
-            <strong>Step 2:</strong><br>
-            Click <strong>Add Doctor</strong>.
 
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Enter the doctor's full name.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            Enter the doctor's qualification or specialty.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Enter registration or other required
-            professional information.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Click <strong>Save Doctor</strong>.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            The saved doctor should become available
-            in the doctor selection lists used by
-            the hospital system.
-
-            <br><br>
-
-            💡 If you want, ask me:
-            <strong>"How do I select a doctor in consultation?"</strong>
-        `;
-    }
-
-
-    /* ==========================================
-       BED MANAGEMENT
-       ========================================== */
-
-    if (
-        lower.includes("bed") ||
-        lower.includes("beds") ||
-        lower.includes("bed status") ||
-        lower.includes("occupied")
-    ) {
-
-        return `
-            🛏️ <strong>How to Update Bed Status</strong>
-
-            <br><br>
-
-            The hospital has <strong>25 beds</strong>.
-
-            <br><br>
-
-            <strong>Step 1:</strong><br>
-            Open <strong>Bed Management</strong>.
-
-            <br><br>
-
-            <strong>Step 2:</strong><br>
-            Select the required bed.
-
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Select <strong>Occupied</strong> or
-            <strong>Available</strong>.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            If occupied, enter the patient's name.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Enter the UHID.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Enter the patient's location,
-            such as Ward, Daycare, ICU, Casualty
-            or Special Room.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            Save the bed information.
-
-            <br><br>
-
-            The bed status can then be displayed
-            as <strong>Occupied</strong> or
-            <strong>Available</strong>.
-        `;
-    }
-
-
-    /* ==========================================
-       PATIENT RECORD
-       ========================================== */
-
-    if (
-        lower.includes("patient record") ||
-        lower.includes("patients record") ||
-        lower.includes("patient registration") ||
-        lower.includes("create patient")
-    ) {
-
-        return `
-            📁 <strong>How to Create a Patient Record</strong>
-
-            <br><br>
-
-            <strong>Step 1:</strong><br>
-            Open <strong>Patients Record</strong>.
-
-            <br><br>
-
-            <strong>Step 2:</strong><br>
-            Open the <strong>Registration</strong> page.
-
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Enter the patient's name and basic details.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            Enter the UHID.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Complete the registration information.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Continue through Consultation,
-            Investigations, Prescription,
-            Admission & Treatment, Billing,
-            Follow-up and Discharge Summary.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            Save the patient record.
-
-            <br><br>
-
-            The goal is to keep the patient's complete
-            hospital information connected to the same
-            patient record.
-        `;
-    }
-
-
-    /* ==========================================
-       BILLING
-       ========================================== */
-
-    if (
-        lower.includes("billing") ||
-        lower.includes("bill") ||
-        lower.includes("make a bill")
-    ) {
-
-        return `
-            💳 <strong>How to Make a Patient Bill</strong>
-
-            <br><br>
-
-            <strong>Step 1:</strong><br>
-            Open <strong>Billing</strong>.
-
-            <br><br>
-
-            <strong>Step 2:</strong><br>
-            Select or enter the patient.
-
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Confirm the patient's UHID and name.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            Select the required billing items.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Enter the quantity.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Enter or update the rate.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            The amount should calculate as:
-
-            <br><br>
-
-            <strong>Amount = Quantity × Rate</strong>
-
-            <br><br>
-
-            <strong>Step 8:</strong><br>
-            Enter discount if applicable.
-
-            <br><br>
-
-            <strong>Step 9:</strong><br>
-            Enter amount paid.
-
-            <br><br>
-
-            <strong>Step 10:</strong><br>
-            Select the payment mode.
-
-            <br><br>
-
-            <strong>Step 11:</strong><br>
-            Check the balance.
-
-            <br><br>
-
-            <strong>Step 12:</strong><br>
-            Save and print the bill.
-        `;
-    }
-
-
-    /* ==========================================
-       O.T. SLOT
-       ========================================== */
-
-    if (
-        lower.includes("o.t") ||
-        lower.includes("ot slot") ||
-        lower.includes("operation theatre") ||
-        lower.includes("operation theater") ||
-        lower.includes("book ot")
-    ) {
-
-        return `
-            🏗️ <strong>How to Book an O.T. Slot</strong>
-
-            <br><br>
-
-            <strong>Step 1:</strong><br>
-            Open <strong>O.T. Slots</strong>.
-
-            <br><br>
-
-            <strong>Step 2:</strong><br>
-            Select the operation date.
-
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Select the starting time.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            Enter the expected duration.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Enter the patient name and UHID.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Select the doctor.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            Enter the procedure or operation.
-
-            <br><br>
-
-            <strong>Step 8:</strong><br>
-            Save the O.T. slot.
-
-            <br><br>
-
-            SUVIDHA can then use the stored O.T.
-            information when answering questions
-            about the theatre schedule.
-        `;
-    }
-
-
-    /* ==========================================
-       DISCHARGE SUMMARY
-       ========================================== */
-
-    if (
-        lower.includes("discharge") ||
-        lower.includes("discharge summary")
-    ) {
-
-        return `
-            📄 <strong>How to Prepare a Discharge Summary</strong>
-
-            <br><br>
-
-            <strong>Step 1:</strong><br>
-            Open the patient's record.
-
-            <br><br>
-
-            <strong>Step 2:</strong><br>
-            Open <strong>Discharge Summary</strong>.
-
-            <br><br>
-
-            <strong>Step 3:</strong><br>
-            Confirm patient name and UHID.
-
-            <br><br>
-
-            <strong>Step 4:</strong><br>
-            Enter admission and discharge details.
-
-            <br><br>
-
-            <strong>Step 5:</strong><br>
-            Enter the final diagnosis.
-
-            <br><br>
-
-            <strong>Step 6:</strong><br>
-            Enter investigations and procedures.
-
-            <br><br>
-
-            <strong>Step 7:</strong><br>
-            Enter the hospital course.
-
-            <br><br>
-
-            <strong>Step 8:</strong><br>
-            Enter medicines and advice.
-
-            <br><br>
-
-            <strong>Step 9:</strong><br>
-            Enter follow-up instructions.
-
-            <br><br>
-
-            <strong>Step 10:</strong><br>
-            Save and print the discharge summary.
-        `;
-    }
-
-
-    /* ==========================================
-       HELP
-       ========================================== */
-
-    if (
-        lower.includes("help") ||
-        lower.includes("what can you do") ||
-        lower.includes("what can i ask")
-    ) {
-
-        return `
-            🤖 <strong>SUVIDHA AI Help</strong>
-
-            <br><br>
-
-            Hello <strong>${helloName}</strong>!
-
-            <br><br>
-
-            I can guide you step by step with:
-
-            <br><br>
-
-            🩺 Doctor Information<br>
-            🛏️ Bed Management<br>
-            📁 Patient Records<br>
-            🧑‍⚕️ Registration<br>
-            🩺 Consultation<br>
-            🧪 Investigations<br>
-            💊 Prescription / Pharmacy<br>
-            🏥 Admission & Treatment<br>
-            💳 Billing<br>
-            📅 Follow-up<br>
-            📄 Discharge Summary<br>
-            🏗️ O.T. Slots
-
-            <br><br>
-
-            Ask me something like:
-
-            <br><br>
-
-            <strong>"How do I add doctor information?"</strong>
-        `;
-    }
-
-
-    /* ==========================================
-       DEFAULT RESPONSE
-       ========================================== */
-
-    return `
-        🤖 <strong>SUVIDHA AI</strong>
-
-        <br><br>
-
-        Hello <strong>${helloName}</strong>!
-
-        <br><br>
-
-        I can explain hospital software tasks
-        <strong>step by step</strong>.
-
-        <br><br>
-
-        Try asking:
-
-        <br><br>
-
-        🩺 "How do I add doctor information?"<br>
-        🛏️ "How do I update a bed?"<br>
-        📁 "How do I create a patient record?"<br>
-        💳 "How do I make a bill?"<br>
-        🏗️ "How do I book an O.T. slot?"<br>
-        📄 "How do I prepare a discharge summary?"
-
-        <br><br>
-
-        Or simply tell me your name, for example:
-
-        <br><br>
-
-        <strong>"My name is Rahul"</strong>
-    `;
-}
-/* ============================================================
-   SUVIDHA AI QUESTION
-   ============================================================ */
-
-function suvidhaAsk() {
-
-    const input =
-        document.getElementById(
-            "suvidhaQuestion"
+        chat.appendChild(
+            message
         );
 
-    const answerBox =
-        document.getElementById(
-            "suvidhaAnswer"
+
+        chat.scrollTop =
+            chat.scrollHeight;
+
+
+        if (type === "ai") {
+
+            lastAIAnswer =
+                String(text);
+
+        }
+
+    }
+
+
+    window.suvidhaAsk =
+        function () {
+
+            const input =
+                document.getElementById(
+                    "suvidhaInput"
+                );
+
+
+            if (!input) {
+                return;
+            }
+
+
+            const question =
+                input.value.trim();
+
+
+            if (!question) {
+                return;
+            }
+
+
+            addSuvidhaMessage(
+                question,
+                "user"
+            );
+
+
+            const answer =
+                suvidhaAnswer(
+                    question
+                );
+
+
+            addSuvidhaMessage(
+                answer,
+                "ai"
+            );
+
+
+            input.value = "";
+
+        };
+
+
+    window.suvidhaQuick =
+        function (question) {
+
+            const input =
+                document.getElementById(
+                    "suvidhaInput"
+                );
+
+
+            if (!input) {
+                return;
+            }
+
+
+            input.value =
+                question;
+
+
+            window.suvidhaAsk();
+
+        };
+
+
+    window.suvidhaSpeakLast =
+        function () {
+
+            if (
+                !lastAIAnswer ||
+                !window.speechSynthesis
+            ) {
+
+                return;
+
+            }
+
+
+            const utterance =
+                new SpeechSynthesisUtterance(
+                    lastAIAnswer
+                );
+
+
+            utterance.lang =
+                "en-IN";
+
+
+            utterance.rate =
+                0.95;
+
+
+            window.speechSynthesis.cancel();
+
+
+            window.speechSynthesis.speak(
+                utterance
+            );
+
+        };
+
+
+    window.suvidhaVoiceInput =
+        function () {
+
+            const SpeechRecognition =
+                window.SpeechRecognition ||
+                window.webkitSpeechRecognition;
+
+
+            if (!SpeechRecognition) {
+
+                alert(
+                    "Voice input is not supported by this browser."
+                );
+
+                return;
+
+            }
+
+
+            const recognition =
+                new SpeechRecognition();
+
+
+            recognition.lang =
+                "en-IN";
+
+
+            recognition.interimResults =
+                false;
+
+
+            recognition.continuous =
+                false;
+
+
+            recognition.onresult =
+                function (event) {
+
+                    const spoken =
+                        event
+                            .results[0][0]
+                            .transcript;
+
+
+                    const input =
+                        document.getElementById(
+                            "suvidhaInput"
+                        );
+
+
+                    if (input) {
+
+                        input.value =
+                            spoken;
+
+                        window.suvidhaAsk();
+
+                    }
+
+                };
+
+
+            recognition.onerror =
+                function () {
+
+                    alert(
+                        "Microphone input could not be read. Please allow microphone permission."
+                    );
+
+                };
+
+
+            recognition.start();
+
+        };
+
+
+    /* ========================================================
+       CLOUD SHARING
+       ======================================================== */
+
+    async function cloudSave() {
+
+        if (
+            !CLOUD.enabled ||
+            !CLOUD.url ||
+            CLOUD.url.includes(
+                "PASTE_YOUR"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const databaseURL =
+                CLOUD.url.replace(
+                    /\/$/,
+                    ""
+                );
+
+
+            await fetch(
+                databaseURL +
+                "/ksuvidha.json",
+                {
+
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            state
+                        )
+
+                }
+            );
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Cloud save failed.",
+                error
+            );
+
+        }
+
+    }
+
+
+    async function cloudLoad() {
+
+        if (
+            !CLOUD.enabled ||
+            !CLOUD.url ||
+            CLOUD.url.includes(
+                "PASTE_YOUR"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const databaseURL =
+                CLOUD.url.replace(
+                    /\/$/,
+                    ""
+                );
+
+
+            const response =
+                await fetch(
+                    databaseURL +
+                    "/ksuvidha.json"
+                );
+
+
+            if (!response.ok) {
+                return;
+            }
+
+
+            const cloudData =
+                await response.json();
+
+
+            if (!cloudData) {
+                return;
+            }
+
+
+            Object.keys(state)
+                .forEach(
+                    key =>
+                        delete state[key]
+                );
+
+
+            Object.assign(
+                state,
+                cloudData
+            );
+
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(state)
+            );
+
+
+            showSavedFiles();
+
+        }
+
+        catch (error) {
+
+            console.warn(
+                "Cloud load failed.",
+                error
+            );
+
+        }
+
+    }
+
+
+    window.ksuvidhaCloudSync =
+        cloudLoad;
+
+
+    /* ========================================================
+       CSS
+       ======================================================== */
+
+    function injectCSS() {
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.textContent = `
+
+            * {
+                box-sizing: border-box;
+            }
+
+
+            body {
+                margin: 0;
+                font-family:
+                    Arial,
+                    Helvetica,
+                    sans-serif;
+                background:
+                    #f4f9fb;
+                color:
+                    #18323f;
+            }
+
+
+            button {
+                font-family: inherit;
+                cursor: pointer;
+            }
+
+
+            .ks-home,
+            .ks-page {
+
+                max-width:
+                    1200px;
+
+                margin:
+                    0 auto;
+
+                padding:
+                    24px;
+
+            }
+
+
+            .ks-hero {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    1.5fr 1fr;
+
+                gap:
+                    28px;
+
+                align-items:
+                    center;
+
+                padding:
+                    38px;
+
+                border-radius:
+                    32px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #f3fbff,
+                        #e6f3f7
+                    );
+
+            }
+
+
+            .ks-eyebrow {
+
+                letter-spacing:
+                    2px;
+
+                font-size:
+                    12px;
+
+                font-weight:
+                    700;
+
+                color:
+                    #287596;
+
+            }
+
+
+            .ks-hero h1 {
+
+                font-size:
+                    42px;
+
+                line-height:
+                    1.08;
+
+                margin:
+                    10px 0;
+
+            }
+
+
+            .ks-hero p {
+
+                font-size:
+                    17px;
+
+                line-height:
+                    1.7;
+
+            }
+
+
+            .ks-hero-actions,
+            .ks-actions,
+            .suvidha-input,
+            .suvidha-quick {
+
+                display:
+                    flex;
+
+                gap:
+                    12px;
+
+                flex-wrap:
+                    wrap;
+
+            }
+
+
+            .ks-hero-actions button,
+            .ks-actions button,
+            .suvidha-input button,
+            .suvidha-quick button,
+            .ks-head-actions button,
+            .ot-types button,
+            .bed-card button,
+            .saved-row button {
+
+                border:
+                    0;
+
+                border-radius:
+                    18px;
+
+                padding:
+                    12px 18px;
+
+                background:
+                    #e5f2f7;
+
+            }
+
+
+            .ks-hero-actions .primary,
+            .ks-actions .save {
+
+                background:
+                    #176c8d;
+
+                color:
+                    white;
+
+            }
+
+
+            .ks-hero-logo {
+
+                min-height:
+                    300px;
+
+                border-radius:
+                    30px;
+
+                background:
+                    white;
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                box-shadow:
+                    0 10px 35px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .07
+                    );
+
+            }
+
+
+            .ks-hero-logo img {
+
+                width:
+                    58px;
+
+                height:
+                    58px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+                margin-bottom:
+                    14px;
+
+            }
+
+
+            .ks-cards {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        3,
+                        1fr
+                    );
+
+                gap:
+                    18px;
+
+                margin-top:
+                    26px;
+
+            }
+
+
+            .ks-cards button {
+
+                text-align:
+                    left;
+
+                background:
+                    white;
+
+                border:
+                    0;
+
+                border-radius:
+                    25px;
+
+                padding:
+                    24px;
+
+                min-height:
+                    120px;
+
+                box-shadow:
+                    0 8px 28px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .06
+                    );
+
+            }
+
+
+            .ks-cards b,
+            .ks-cards span {
+
+                display:
+                    block;
+
+            }
+
+
+            .ks-cards span {
+
+                margin-top:
+                    8px;
+
+                color:
+                    #6b7d86;
+
+            }
+
+
+            .ks-page-head {
+
+                display:
+                    flex;
+
+                justify-content:
+                    space-between;
+
+                align-items:
+                    center;
+
+                gap:
+                    15px;
+
+                margin-bottom:
+                    22px;
+
+            }
+
+
+            .ks-page-head h1 {
+
+                margin:
+                    5px 0;
+
+            }
+
+
+            .ks-head-actions {
+
+                display:
+                    flex;
+
+                gap:
+                    8px;
+
+            }
+
+
+            .ks-paper {
+
+                background:
+                    white;
+
+                border-radius:
+                    28px;
+
+                padding:
+                    30px;
+
+                box-shadow:
+                    0 9px 30px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .06
+                    );
+
+            }
+
+
+            .ks-paper-head {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    15px;
+
+                padding-bottom:
+                    18px;
+
+                margin-bottom:
+                    20px;
+
+                border-bottom:
+                    1px solid
+                    #dce7eb;
+
+            }
+
+
+            .ks-paper-head img {
+
+                width:
+                    58px;
+
+                height:
+                    58px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+            }
+
+
+            .ks-paper-head small {
+
+                display:
+                    block;
+
+                margin-top:
+                    4px;
+
+                color:
+                    #6b7d86;
+
+            }
+
+
+            .ks-form-grid {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(
+                            0,
+                            1fr
+                        )
+                    );
+
+                gap:
+                    22px 30px;
+
+            }
+
+
+            .ks-field {
+
+                display:
+                    block;
+
+            }
+
+
+            .ks-field.full {
+
+                grid-column:
+                    1 / -1;
+
+            }
+
+
+            .ks-field span {
+
+                display:
+                    block;
+
+                font-size:
+                    12px;
+
+                font-weight:
+                    700;
+
+                margin-bottom:
+                    6px;
+
+            }
+
+
+            .ks-field input,
+            .ks-field select {
+
+                width:
+                    100%;
+
+                border:
+                    0;
+
+                border-bottom:
+                    2px solid
+                    #c4d5db;
+
+                background:
+                    transparent;
+
+                padding:
+                    11px 5px;
+
+                outline:
+                    none;
+
+            }
+
+
+            .ks-field textarea {
+
+                width:
+                    100%;
+
+                min-height:
+                    100px;
+
+                border:
+                    1px solid
+                    #d6e2e7;
+
+                border-radius:
+                    14px;
+
+                padding:
+                    12px;
+
+                resize:
+                    vertical;
+
+                outline:
+                    none;
+
+            }
+
+
+            .ks-bill-head {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        3,
+                        1fr
+                    );
+
+                gap:
+                    12px;
+
+            }
+
+
+            .ks-bill-head input,
+            .ks-bill-head select {
+
+                border:
+                    0;
+
+                border-bottom:
+                    2px solid
+                    #c4d5db;
+
+                padding:
+                    10px;
+
+            }
+
+
+            .ks-bill {
+
+                width:
+                    100%;
+
+                border-collapse:
+                    collapse;
+
+                margin-top:
+                    22px;
+
+            }
+
+
+            .ks-bill th,
+            .ks-bill td {
+
+                padding:
+                    10px;
+
+                border-bottom:
+                    1px solid
+                    #e1eaed;
+
+                text-align:
+                    left;
+
+            }
+
+
+            .ks-bill input {
+
+                width:
+                    90px;
+
+                border:
+                    0;
+
+                border-bottom:
+                    1px solid
+                    #b9cbd2;
+
+                padding:
+                    7px;
+
+            }
+
+
+            .ks-total {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        4,
+                        1fr
+                    );
+
+                gap:
+                    14px;
+
+                margin-top:
+                    20px;
+
+            }
+
+
+            .ks-total label {
+
+                font-size:
+                    12px;
+
+                font-weight:
+                    700;
+
+            }
+
+
+            .ks-total input,
+            .ks-total select {
+
+                width:
+                    100%;
+
+                border:
+                    0;
+
+                border-bottom:
+                    2px solid
+                    #c4d5db;
+
+                padding:
+                    10px;
+
+            }
+
+
+            .bed-grid {
+
+                display:
+                    grid;
+
+                grid-template-columns:
+                    repeat(
+                        4,
+                        1fr
+                    );
+
+                gap:
+                    15px;
+
+            }
+
+
+            .bed-card {
+
+                padding:
+                    18px;
+
+                border-radius:
+                    22px;
+
+                background:
+                    #f4fafc;
+
+            }
+
+
+            .bed-card.occupied {
+
+                background:
+                    #fff0f0;
+
+            }
+
+
+            .bed-card b {
+
+                display:
+                    block;
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .bed-card span {
+
+                display:
+                    block;
+
+                margin:
+                    7px 0 12px;
+
+                font-weight:
+                    700;
+
+            }
+
+
+            .bed-card input {
+
+                width:
+                    100%;
+
+                border:
+                    0;
+
+                border-bottom:
+                    1px solid
+                    #bacbd1;
+
+                background:
+                    transparent;
+
+                padding:
+                    9px 4px;
+
+                margin:
+                    5px 0;
+
+            }
+
+
+            .ot-types {
+
+                margin-top:
+                    25px;
+
+                padding-top:
+                    22px;
+
+                border-top:
+                    1px solid
+                    #e1eaed;
+
+            }
+
+
+            .ot-types button {
+
+                margin-right:
+                    8px;
+
+            }
+
+
+            #selectedOTDisplay {
+
+                margin-top:
+                    14px;
+
+                padding:
+                    13px;
+
+                border-radius:
+                    15px;
+
+                background:
+                    #f0f8fb;
+
+            }
+
+
+            .saved-group {
+
+                background:
+                    white;
+
+                border-radius:
+                    22px;
+
+                padding:
+                    20px;
+
+                margin:
+                    15px 0;
+
+                box-shadow:
+                    0 7px 25px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .05
+                    );
+
+            }
+
+
+            .saved-row {
+
+                display:
+                    flex;
+
+                justify-content:
+                    space-between;
+
+                align-items:
+                    center;
+
+                gap:
+                    15px;
+
+                padding:
+                    13px 0;
+
+                border-bottom:
+                    1px solid
+                    #edf2f4;
+
+            }
+
+
+            .saved-row span {
+
+                display:
+                    block;
+
+                color:
+                    #71828a;
+
+                font-size:
+                    12px;
+
+                margin-top:
+                    4px;
+
+            }
+
+
+            .saved-pre {
+
+                white-space:
+                    pre-wrap;
+
+                overflow:
+                    auto;
+
+                background:
+                    #f5fafc;
+
+                padding:
+                    20px;
+
+                border-radius:
+                    16px;
+
+            }
+
+
+            .suvidha-master {
+
+                background:
+                    white;
+
+                border-radius:
+                    32px;
+
+                padding:
+                    28px;
+
+                box-shadow:
+                    0 10px 35px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .06
+                    );
+
+            }
+
+
+            .suvidha-master header {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    15px;
+
+            }
+
+
+            .suvidha-master header img {
+
+                width:
+                    58px;
+
+                height:
+                    58px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+            }
+
+
+            .suvidha-master h1 {
+
+                margin:
+                    0;
+
+            }
+
+
+            .suvidha-chat {
+
+                min-height:
+                    360px;
+
+                max-height:
+                    60vh;
+
+                overflow:
+                    auto;
+
+                margin:
+                    20px 0;
+
+                padding:
+                    12px;
+
+            }
+
+
+            .suvidha-ai,
+            .suvidha-user {
+
+                max-width:
+                    82%;
+
+                padding:
+                    15px 18px;
+
+                border-radius:
+                    22px;
+
+                margin:
+                    10px 0;
+
+                white-space:
+                    pre-wrap;
+
+                line-height:
+                    1.65;
+
+            }
+
+
+            .suvidha-ai {
+
+                background:
+                    #eef7fa;
+
+                margin-right:
+                    auto;
+
+            }
+
+
+            .suvidha-user {
+
+                background:
+                    #e4f0f5;
+
+                margin-left:
+                    auto;
+
+            }
+
+
+            .suvidha-input input {
+
+                flex:
+                    1;
+
+                min-width:
+                    200px;
+
+                border:
+                    0;
+
+                border-bottom:
+                    2px solid
+                    #bfd0d7;
+
+                padding:
+                    12px;
+
+                outline:
+                    none;
+
+            }
+
+
+            .side-menu {
+
+                position:
+                    fixed;
+
+                top:
+                    0;
+
+                right:
+                    -360px;
+
+                width:
+                    330px;
+
+                height:
+                    100vh;
+
+                background:
+                    white;
+
+                z-index:
+                    9999;
+
+                padding:
+                    25px;
+
+                box-shadow:
+                    -10px 0 35px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .12
+                    );
+
+                transition:
+                    right .25s;
+
+                border-radius:
+                    28px 0 0 28px;
+
+            }
+
+
+            .side-menu.open {
+
+                right:
+                    0;
+
+            }
+
+
+            .side-menu button {
+
+                display:
+                    block;
+
+                width:
+                    100%;
+
+                text-align:
+                    left;
+
+                border:
+                    0;
+
+                background:
+                    #f1f7f9;
+
+                border-radius:
+                    15px;
+
+                padding:
+                    13px;
+
+                margin:
+                    8px 0;
+
+            }
+
+
+            @media (
+                max-width: 800px
+            ) {
+
+                .ks-hero {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .ks-cards {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .ks-form-grid {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .ks-total {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .ks-bill-head {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .bed-grid {
+
+                    grid-template-columns:
+                        1fr;
+
+                }
+
+
+                .ks-hero h1 {
+
+                    font-size:
+                        32px;
+
+                }
+
+            }
+
+
+            @media print {
+
+                .ks-head-actions,
+                .ks-actions,
+                .suvidha-input,
+                .suvidha-quick,
+                .menu-button,
+                .side-menu {
+
+                    display:
+                        none !important;
+
+                }
+
+
+                body {
+
+                    background:
+                        white !important;
+
+                }
+
+
+                .ks-paper {
+
+                    box-shadow:
+                        none !important;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
         );
 
-    if (
-        !input ||
-        !answerBox
-    ) {
-
-        return;
-
     }
 
-    const question =
-        input.value
-            .toLowerCase()
-            .trim();
 
-    if (!question) {
+    /* ========================================================
+       START
+       ======================================================== */
 
-        answerBox.textContent =
-            "Please ask me something.";
-
-        return;
-
-    }
-
-    let answer =
-        "I can help with patient records, beds, O.T slots, billing, registration, doctors and hospital information.";
-
-    /* BED */
-
-    if (
-        question.includes("bed") ||
-        question.includes("beds") ||
-        question.includes("occupied") ||
-        question.includes("available")
-    ) {
-
-        answer =
-            getBedStatusForAI();
-
-    }
-
-    /* ICU */
-
-    else if (
-        question.includes("icu")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.icu;
-
-    }
-
-    /* WARD */
-
-    else if (
-        question.includes("ward")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.ward;
-
-    }
-
-    /* DAYCARE */
-
-    else if (
-        question.includes("daycare")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.daycare;
-
-    }
-
-    /* CASUALTY */
-
-    else if (
-        question.includes("casualty")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.casualty;
-
-    }
-
-    /* SPECIAL ROOM */
-
-    else if (
-        question.includes("special room") ||
-        question.includes("special rooms")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.specialRoom;
-
-    }
-
-    /* OT */
-
-    else if (
-        question.includes("ot") ||
-        question.includes("o.t") ||
-        question.includes("operation") ||
-        question.includes("slot")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.ot;
-
-    }
-
-    /* RECEPTION */
-
-    else if (
-        question.includes("reception") ||
-        question.includes("receptionist")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.receptionist;
-
-    }
-
-    /* PATIENT */
-
-    else if (
-        question.includes("patient record") ||
-        question.includes("patient records") ||
-        question.includes("patient")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.patientRecord;
-
-    }
-
-    /* BILLING */
-
-    else if (
-        question.includes("bill") ||
-        question.includes("billing")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.billing;
-
-    }
-
-    /* DOCTOR */
-
-    else if (
-        question.includes("doctor") ||
-        question.includes("doctors")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.doctors;
-
-    }
-
-    /* SELF AWARENESS */
-
-    else if (
-        question.includes("self aware") ||
-        question.includes("self-awareness") ||
-        question.includes("conscious") ||
-        question.includes("consciousness")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.selfAwareness;
-
-    }
-
-    /* HOSPITAL */
-
-    else if (
-        question.includes("hospital")
-    ) {
-
-        answer =
-            SUVIDHA_KNOWLEDGE.identity +
-            "\n\n" +
-            SUVIDHA_KNOWLEDGE.hospital +
-            "\n\n" +
-            SUVIDHA_KNOWLEDGE.beds;
-
-    }
-
-    answer = String(answer)
-    .replace(...)
-
-/* ============================================================
-   SUVIDHA QUICK QUESTIONS
-   ============================================================ */
-
-function suvidhaQuick(type) {
-
-    const input =
-        document.getElementById(
-            "suvidhaQuestion"
-        );
-
-    if (!input) {
-        return;
-    }
-
-    if (type === "beds") {
-
-        input.value =
-            "Show current bed status";
-
-    }
-
-    else if (type === "ot") {
-
-        input.value =
-            "Tell me about O.T slots";
-
-    }
-
-    else if (type === "patient") {
-
-        input.value =
-            "What is in the patient record?";
-
-    }
-
-    else if (type === "reception") {
-
-        input.value =
-            "How can you help the receptionist?";
-
-    }
-
-    else if (type === "hospital") {
-
-        input.value =
-            "Tell me about the hospital";
-
-    }
-
-    suvidhaAsk();
-}
-
-/* ============================================================
-   MAIN PAGE ROUTER
-   ============================================================ */
-
-function showPage(page) {
-
-    switch (page) {
-
-        case "home":
-
-            showHome();
-
-            break;
-
-        case "patient-record":
-
-            showPatientRecord(1);
-
-            break;
-
-        case "registration":
-
-            showRegistration();
-
-            break;
-
-        case "consultation":
-
-            showConsultation();
-
-            break;
-
-        case "billing":
-
-            showBilling();
-
-            break;
-
-        case "discharge":
-
-            showDischarge();
-
-            break;
-
-        case "beds":
-
-            showBedManagement();
-
-            break;
-
-        case "ot-slot":
-
-            showOTSlot();
-
-            break;
-
-        case "suvidha":
-
-            showSuvidha();
-
-            break;
-
-        default:
-
-            showHome();
-
-            break;
-
-    }
-
-    window.scrollTo(
-        0,
-        0
-    );
-}
-
-/* ============================================================
-   INITIALIZE APPLICATION
-   ============================================================ */
-
-function initializeKSuvidha() {
-
-    getApp();
-
-    if (!app) {
-        return;
-    }
-
-    createBeds();
+    injectCSS();
 
     showHome();
-}
 
-/* ============================================================
-   START APPLICATION
-   ============================================================ */
 
-if (
-    document.readyState === "loading"
-) {
+    /*
+       If cloud sharing is enabled,
+       download the latest shared data.
+    */
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        initializeKSuvidha
-    );
+    if (CLOUD.enabled) {
 
-} else {
+        cloudLoad();
 
-    initializeKSuvidha();
-
-}
-/* ===============================
-   K SUVIDHA HOSPITAL - SIDE MENU
-   =============================== */
-
-function openMenu() {
-    const menu = document.querySelector(".side-menu");
-
-    if (!menu) {
-        console.log("Side menu not found");
-        return;
     }
 
-    menu.classList.toggle("open");
-}
-
-/* Close menu when clicking outside */
-document.addEventListener("click", function (event) {
-
-    const menu = document.querySelector(".side-menu");
-    const button = document.querySelector(".menu-button");
-
-    if (!menu || !button) return;
-
-    if (
-        menu.classList.contains("open") &&
-        !menu.contains(event.target) &&
-        !button.contains(event.target)
-    ) {
-        menu.classList.remove("open");
-    }
-});
-
-/* Close menu when selecting a menu item */
-document.addEventListener("click", function (event) {
-
-    if (event.target.closest(".side-menu button, .side-menu a")) {
-
-        const menu = document.querySelector(".side-menu");
-
-        if (menu) {
-            menu.classList.remove("open");
-        }
-    }
-});
-<div class="ot-type-bottom">
-
-    <h3>O.T. TYPE</h3>
-
-    <div class="ot-type-options">
-
-        <button type="button"
-                class="ot-type-button"
-                onclick="selectOTType('MODULAR O.T.')">
-            MODULAR O.T.
-        </button>
-
-        <button type="button"
-                class="ot-type-button"
-                onclick="selectOTType('GENERAL SURGERY O.T.')">
-            GENERAL SURGERY O.T.
-        </button>
-
-    </div>
-
-    <input type="hidden"
-           id="selectedOTType"
-           value="">
-
-    <div id="selectedOTDisplay" class="selected-ot-display">
-        Please select O.T. type
-    </div>
-
-</div>
+})();
